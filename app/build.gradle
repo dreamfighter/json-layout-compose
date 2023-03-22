@@ -8,7 +8,7 @@ android {
     compileSdk 31
 
     defaultConfig {
-        applicationId "com.example.dynamicitemlazycolumn"
+        applicationId "id.dreamfighter.android.compose.tojson"
         minSdk 24
         targetSdk 31
         versionCode 1

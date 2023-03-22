@@ -1,4 +1,4 @@
-package com.example.dynamicitemlazycolumn.ui.theme
+package id.dreamfighter.android.compose.tojson.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

@@ -1,15 +1,12 @@
-package com.example.dynamicitemlazycolumn
+package id.dreamfighter.android.compose.tojson
 
-import com.example.dynamicitemlazycolumn.ui.model.parts.Button
-import com.example.dynamicitemlazycolumn.ui.model.parts.Image
-import com.example.dynamicitemlazycolumn.ui.model.parts.ListItems
-import com.example.dynamicitemlazycolumn.ui.model.parts.Text
-import com.example.dynamicitemlazycolumn.ui.model.type.ItemColor
-import com.example.dynamicitemlazycolumn.ui.model.type.Type
+import id.dreamfighter.android.compose.tojson.ui.model.type.ItemColor
+import id.dreamfighter.android.compose.tojson.ui.model.type.Type
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import id.dreamfighter.android.compose.tojson.ui.model.parts.*
 
 fun loadPayload(jsonPayload: String): Payload? {
     val moshi = Moshi.Builder()
@@ -19,11 +16,15 @@ fun loadPayload(jsonPayload: String): Payload? {
                 .withSubtype(Button::class.java, Type.BUTTON.name)
                 .withSubtype(Image::class.java, Type.IMAGE.name)
                 .withSubtype(
-                    com.example.dynamicitemlazycolumn.ui.model.parts.Row::class.java,
+                    Row::class.java,
                     Type.ROW.name
                 )
                 .withSubtype(
-                    com.example.dynamicitemlazycolumn.ui.model.parts.Column::class.java,
+                    Box::class.java,
+                    Type.BOX.name
+                )
+                .withSubtype(
+                    Column::class.java,
                     Type.COLUMN.name
                 )
                 .withDefaultValue(

@@ -1,17 +1,14 @@
-package com.example.dynamicitemlazycolumn.ui.model.utils
+package id.dreamfighter.android.compose.tojson.ui.model.utils
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.example.dynamicitemlazycolumn.ui.model.type.Align
-import com.example.dynamicitemlazycolumn.ui.model.type.ItemColor
-import com.example.dynamicitemlazycolumn.ui.model.parts.ListItems
+import id.dreamfighter.android.compose.tojson.ui.model.type.Align
+import id.dreamfighter.android.compose.tojson.ui.model.type.ItemColor
+import id.dreamfighter.android.compose.tojson.ui.model.parts.ListItems
 
 @Composable
 fun RowScope.createModifier(
@@ -64,3 +61,6 @@ private fun commonModifier(
         else -> modifier
     }
 }
+
+val String.color
+    get() = Color(android.graphics.Color.parseColor(this))

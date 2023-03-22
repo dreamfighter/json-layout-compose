@@ -1,5 +1,73 @@
-package com.example.dynamicitemlazycolumn
+package id.dreamfighter.android.compose.tojson
 
+val payloadMajidTv = """
+{
+   "listItems":[
+      {
+         "type":"IMAGE",
+         "message":"Hello Here",
+         "props":{"contentScale":"FillWidth","fillMaxWidth":true},
+         "backgroundColor": "GREEN"
+      },
+      {
+        "type":"COLUMN",
+         "listItems":[
+            {
+                "type":"BOX",
+                "props":{"fillMaxWidth":true},
+                "listItems":[
+                    {
+                        "type":"ROW",
+                        "props":{
+                            "height":90,
+                            "background":"#55000000",
+                            "align":"CENTER"
+                        },
+                        "listItems":[
+                            {
+                                 "type":"TEXT",
+                                 "message":"Sabtu, 11 Mar 2023\n19 Sha'ban 1444",
+                                 "textAlign":"START",
+                                 "alignment":"CENTER",
+                                 "color":"#FFFFFFFF",
+                                 "textFont":20,
+                                 "props":{
+                                    "padding":{"start":16}
+                                 }
+                            },{
+                                 "type":"TEXT",
+                                 "message":"Masjid AT-Taqwa Pesona Ciganitri",
+                                 "textAlign":"CENTER",
+                                 "alignment":"CENTER",
+                                 "color":"#FFFFFFFF",
+                                 "textFont":30,
+                                 "props":{
+                                    "padding":{"start":16,"end":16}
+                                 },
+                                 "weight":1.0
+                            },{
+                                 "type":"TEXT",
+                                 "message":"11:50:00",
+                                 "textAlign":"CENTER",
+                                 "alignment":"CENTER",
+                                 "color":"#FFFFFFFF",
+                                 "textFont":50,
+                                 "props":{
+                                    "padding":{"start":16,"end":16}
+                                 }
+                            }
+                        ]
+                    }
+                ]
+            },{
+                "type":"BOX",
+                "props":{"fillMaxWidth":true}
+            }
+         ]
+      }
+   ]
+}
+""".trimIndent()
 
 val payloadOne = """
 {
