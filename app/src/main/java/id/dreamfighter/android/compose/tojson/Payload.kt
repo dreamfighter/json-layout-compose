@@ -62,6 +62,14 @@ val payloadMajidTv = """
             },{
                 "type":"BOX",
                 "props":{"fillMaxWidth":true}
+            },{
+                "type":"TEXT",
+                "message":"Sabtu, 11 Mar 2023, 19 Sha'ban 1444, Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444",
+                "textAlign":"CENTER",
+                "maxLines":1,
+                "alignment":"CENTER",
+                "color":"#FFFFFFFF",
+                "textFont":50
             }
          ]
       }

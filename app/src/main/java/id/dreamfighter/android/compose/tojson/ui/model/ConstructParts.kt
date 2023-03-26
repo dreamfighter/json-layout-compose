@@ -72,15 +72,19 @@ fun ConstructPart(
                     }
                 }
             }
+
             partModifier = content(partModifier,textPart.props)
 
+
             Text(
+                maxLines = textPart.maxLines,
                 text = text,
                 color = color,
                 modifier = partModifier,
                 textAlign = textAlign,
                 fontSize = fontSize
             )
+
         }
         Type.BUTTON -> {
             val text = (listItems as Button).message
@@ -127,9 +131,7 @@ fun ConstructPart(
             ) {
                 items?.let {
                     for (item in items) {
-                        ConstructPart(item, modifier){modifier, _ ->
-                            modifier
-                        }
+                        ConstructPart(item, modifier)
                     }
                 }
 

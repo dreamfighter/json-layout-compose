@@ -31,6 +31,7 @@ fun loadPayload(jsonPayload: String): Payload? {
                     Text(
                         "Oh, what's that?",
                         backgroundColor = ItemColor.RED
+
                     )
                 )
         )

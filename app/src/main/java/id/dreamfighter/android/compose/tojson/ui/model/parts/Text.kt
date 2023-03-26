@@ -9,6 +9,7 @@ class Text(
     val textAlign: Align = Align.CENTER,
     val textFont: String = "DEFAULT",
     val color: String = "#FF000000",
+    val maxLines:Int = 3,
     alignment: Align = Align.CENTER,
     weight: Float = 0f,
     backgroundColor: ItemColor = ItemColor.NONE,
