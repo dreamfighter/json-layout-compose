@@ -6,5 +6,8 @@ enum class Type {
     IMAGE,
     COLUMN,
     ROW,
-    BOX
+    BOX,
+    SPACER,
+    CARD,
+    ANIMATED_VISIBILITY
 }

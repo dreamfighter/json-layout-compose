@@ -8,5 +8,6 @@ class Column(
     val listItems: List<ListItems>,
     alignment: Align = Align.CENTER,
     weight: Float = 0f,
+    val horizontalAlignment:String?,
     backgroundColor: ItemColor = ItemColor.NONE
 ) : ListItems(Type.COLUMN, alignment, weight, backgroundColor)

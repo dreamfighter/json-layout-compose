@@ -1,5 +1,43 @@
 package id.dreamfighter.android.compose.tojson
 
+val payloadBox = """
+{
+   "listItems":[
+        {
+            "type":"COLUMN",
+            "listItems":[
+                {
+                    "type":"BOX",
+                    "props":{"fillMaxWidth":true, "fillWeight":1}
+                },
+                {
+                     "type":"TEXT",
+                     "message":"Sabtu, 11 Mar 2023\n19 Sha'ban 1444",
+                     "textAlign":"START",
+                     "alignment":"CENTER",
+                     "color":"#FFFFFFFF",
+                     "textFont":20,
+                     "props":{
+                        "padding":{"start":16}
+                     }
+                },
+                {
+                     "type":"TEXT",
+                     "message":"Sabtu, 11 Mar 2023\n19 Sha'ban 1444",
+                     "textAlign":"START",
+                     "alignment":"CENTER",
+                     "color":"#FFFFFFFF",
+                     "textFont":20,
+                     "props":{
+                        "padding":{"start":16}
+                     }
+                }
+            ]
+        }
+   ]
+}
+   """
+
 val payloadMajidTv = """
 {
    "listItems":[
@@ -11,7 +49,8 @@ val payloadMajidTv = """
       },
       {
         "type":"COLUMN",
-         "listItems":[
+        "horizontalAlignment":"START",
+        "listItems":[
             {
                 "type":"BOX",
                 "props":{"fillMaxWidth":true},
@@ -21,14 +60,14 @@ val payloadMajidTv = """
                         "props":{
                             "height":90,
                             "background":"#55000000",
-                            "align":"CENTER"
+                            "align":"CENTER",
+                            "fillMaxWidth":true
                         },
                         "listItems":[
                             {
                                  "type":"TEXT",
                                  "message":"Sabtu, 11 Mar 2023\n19 Sha'ban 1444",
                                  "textAlign":"START",
-                                 "alignment":"CENTER",
                                  "color":"#FFFFFFFF",
                                  "textFont":20,
                                  "props":{
@@ -38,22 +77,20 @@ val payloadMajidTv = """
                                  "type":"TEXT",
                                  "message":"Masjid AT-Taqwa Pesona Ciganitri",
                                  "textAlign":"CENTER",
-                                 "alignment":"CENTER",
                                  "color":"#FFFFFFFF",
                                  "textFont":30,
                                  "props":{
-                                    "padding":{"start":16,"end":16}
-                                 },
-                                 "weight":1.0
+                                    "padding":{"start":16,"end":16},
+                                    "fillWeight":1
+                                 }
                             },{
                                  "type":"TEXT",
                                  "message":"11:50:00",
                                  "textAlign":"CENTER",
-                                 "alignment":"CENTER",
                                  "color":"#FFFFFFFF",
                                  "textFont":50,
                                  "props":{
-                                    "padding":{"start":16,"end":16}
+                                    "padding":{"end":16}
                                  }
                             }
                         ]
@@ -61,15 +98,106 @@ val payloadMajidTv = """
                 ]
             },{
                 "type":"BOX",
-                "props":{"fillMaxWidth":true}
+                "props":{"fillMaxWidth":true, "fillWeight":1}
+            },{
+                "type":"ANIMATED_VISIBILITY",
+                "listItems":[
+                    {
+                        "type":"TEXT",
+                        "message":"Subuh - 02:20:34",
+                        "textAlign":"START",
+                        "maxLines":1,
+                        "color":"#FFFFFFFF",
+                        "fontWeight":"BOLD",
+                        "textFont":25,
+                        "props":{
+                            "clip": {"type":"ROUND", "topEnd":24},
+                            "background":"#99D85A5C",
+                            "align": "START",
+                            "padding":{"start":16,"end":16},
+                            "animated":{"type":"visibility"}
+                        }
+                    }
+                ]
             },{
                 "type":"TEXT",
                 "message":"Sabtu, 11 Mar 2023, 19 Sha'ban 1444, Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444",
                 "textAlign":"CENTER",
                 "maxLines":1,
                 "alignment":"CENTER",
-                "color":"#FFFFFFFF",
-                "textFont":50
+                "color":"#FF000000",
+                "fontWeight":"BOLD",
+                "textFont":20,
+                "props":{
+                    "background":"#99DDDDDD",
+                    "fillMaxWidth":true,
+                    "animated":{"type":"scroll"}
+                }
+            },{
+                "type":"BOX",
+                "props":{"background":"#99DDDDDD"},
+                "listItems":[
+                    {
+                        "type":"ROW",
+                        "props":{
+                            "height":90,
+                            "align":"CENTER"
+                        },
+                        "listItems":[
+                            {
+                                "type":"CARD",
+                                "props":{
+                                    "weight":1,
+                                    "padding":{"start": 8, "end": 8}
+                                },
+                                "cardBackgroundColor":"#D85A5C",
+                                "listItems":[
+                                    {
+                                        "type":"COLUMN",
+                                        "listItems":[
+                                            {
+                                                "type":"TEXT",
+                                                "message":"Fajr",
+                                                "color":"#FFFFFFFF",
+                                                "textFont":20
+                                            },{
+                                                "type":"TEXT",
+                                                "message":"04:30",
+                                                "textFont":30,
+                                                "props":{
+                                                    "background":"#FFFFFFFF",
+                                                    "fillMaxWidth":true
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type":"CARD",
+                                "props":{
+                                    "weight":1,
+                                    "padding":{"start": 8, "end": 8},
+                                    "backgroundColor": "#D85A5C"
+                                },
+                                "listItems":[
+                                    {
+                                        "type":"COLUMN",
+                                        "listItems":[
+                                            {
+                                                "type":"TEXT",
+                                                "message":"Fajr"
+                                            },{
+                                                "type":"TEXT",
+                                                "message":"04:30"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
             }
          ]
       }

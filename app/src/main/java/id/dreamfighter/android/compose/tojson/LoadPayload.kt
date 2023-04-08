@@ -15,6 +15,9 @@ fun loadPayload(jsonPayload: String): Payload? {
                 .withSubtype(Text::class.java, Type.TEXT.name)
                 .withSubtype(Button::class.java, Type.BUTTON.name)
                 .withSubtype(Image::class.java, Type.IMAGE.name)
+                .withSubtype(CardPart::class.java, Type.CARD.name)
+                .withSubtype(Spacer::class.java, Type.SPACER.name)
+                .withSubtype(AnimatedVisibility::class.java, Type.ANIMATED_VISIBILITY.name)
                 .withSubtype(
                     Row::class.java,
                     Type.ROW.name
