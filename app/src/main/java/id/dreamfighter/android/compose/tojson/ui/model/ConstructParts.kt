@@ -49,6 +49,7 @@ fun ConstructPart(
         Type.TEXT -> {
             val textPart = listItems as Text
             var partModifier = modifier
+            Log.d("TEXT","${textPart.name}=>${data.value[textPart.name]}")
             val text = if(data.value[textPart.name]!=null){
                 data.value[textPart.name] as String
             }else{

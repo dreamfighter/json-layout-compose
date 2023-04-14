@@ -14,5 +14,6 @@ class Text(
     alignment: Align = Align.CENTER,
     weight: Float = 0f,
     backgroundColor: ItemColor = ItemColor.NONE,
-    props:Map<String,Any> = mapOf()
-) : ListItems(Type.TEXT, alignment, weight, backgroundColor,props)
+    props:Map<String,Any> = mapOf(),
+    name:String = ""
+) : ListItems(Type.TEXT, alignment, weight, backgroundColor,props,name)

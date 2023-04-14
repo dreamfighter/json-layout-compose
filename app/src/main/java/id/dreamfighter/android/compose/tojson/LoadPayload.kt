@@ -7,6 +7,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import id.dreamfighter.android.compose.tojson.ui.model.parts.*
+import java.util.*
 
 fun loadPayload(jsonPayload: String): Payload? {
     val moshi = Moshi.Builder()
@@ -33,8 +34,8 @@ fun loadPayload(jsonPayload: String): Payload? {
                 .withDefaultValue(
                     Text(
                         "Oh, what's that?",
-                        backgroundColor = ItemColor.RED
-
+                        backgroundColor = ItemColor.RED,
+                        name = UUID.randomUUID().toString()
                     )
                 )
         )

@@ -11,5 +11,5 @@ sealed class ListItems(
     val weight: Float = 0f,
     val backgroundColor: ItemColor = ItemColor.NONE,
     val props:Map<String,Any> = mapOf(),
-    val name:String? = UUID.randomUUID().toString()
+    val name:String = ""
 )
