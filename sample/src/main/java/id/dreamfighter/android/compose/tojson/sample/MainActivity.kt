@@ -5,12 +5,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import id.dreamfighter.android.compose.tojson.Payload
 import id.dreamfighter.android.compose.tojson.loadPayload
 import id.dreamfighter.android.compose.tojson.ui.model.ConstructPart
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 
 class MainActivity : ComponentActivity() {
@@ -20,10 +31,74 @@ class MainActivity : ComponentActivity() {
         loadPayload(payloadMajidTv1)?.let{
             setContent {
                 Greeting(payload = it)
-
             }
         }
     }
+
+    fun remainingTime(adzan:State<List<Map<String,String>>>,
+                      nexPrayer:(String)-> Unit,
+                      nexPrayerTime:(String)-> Unit,text:String):String{
+        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        val sdfDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val now = Calendar.getInstance()
+        val tomorrow = Calendar.getInstance()
+        tomorrow.add(Calendar.DATE,1)
+
+        adzan.value.let {
+
+            if(!it[0]["value"].isNullOrBlank() && it[0]["value"]!="null"){
+
+                val imsak = sdf.parse("${sdfDate.format(now.time)} ${it[0]["value"]}")
+                val subuh = sdf.parse("${sdfDate.format(now.time)} ${it[1]["value"]}")
+                val dzuhur = sdf.parse("${sdfDate.format(now.time)} ${it[4]["value"]}")
+                val ashar = sdf.parse("${sdfDate.format(now.time)} ${it[5]["value"]}")
+                val maghrib = sdf.parse("${sdfDate.format(now.time)} ${it[6]["value"]}")
+                val isya = sdf.parse("${sdfDate.format(now.time)} ${it[7]["value"]}")
+                val subuhTomorrow = sdf.parse("${sdfDate.format(tomorrow.time)} ${it[1]["value"]}")
+
+                var jadwal = ""
+                val diff = if (now.time.before(imsak)) {
+                    jadwal = "Imsak"
+                    imsak.time - now.timeInMillis
+                } else if (now.time.before(subuh)) {
+                    jadwal = "Subuh"
+                    subuh.time - now.timeInMillis
+                } else if (now.time.before(dzuhur)) {
+                    jadwal = "Dzuhur"
+                    dzuhur.time - now.timeInMillis
+                } else if (now.time.before(ashar)) {
+                    jadwal = "Ashar"
+                    ashar.time - now.timeInMillis
+                } else if (now.time.before(maghrib)) {
+                    jadwal = "Maghrib"
+                    maghrib.time - now.timeInMillis
+                } else if (now.time.before(isya)) {
+                    jadwal = "Isya"
+                    isya.time - now.timeInMillis
+                } else {
+                    jadwal = "Subuh"
+                    subuhTomorrow.time - now.timeInMillis
+                }
+
+                val diffHours = diff / (60 * 60 * 1000)
+                val diffMinutes = diff / (60 * 1000) % 60
+                val diffSecond = (diff / 1000) % 60
+                nexPrayer(jadwal)
+                nexPrayerTime("$diffHours hours $diffMinutes minutes ${text}remaining")
+                if(diffHours<=0){
+                    return "$jadwal - ${"$diffMinutes".lefpad(2,"0")}:${"$diffSecond".lefpad(2,"0")}"
+                }
+                return "$jadwal - ${"$diffHours".lefpad(2,"0")}:${"$diffMinutes".lefpad(2,"0")}"
+
+            }
+
+        }
+        return ""
+    }
+}
+
+fun String.lefpad(length:Int,additional:String):String{
+    return String.format("%1$" + length + "s", this).replace(" ", additional)
 }
 
 @SuppressLint("UnrememberedMutableState")
@@ -31,7 +106,8 @@ class MainActivity : ComponentActivity() {
 fun Greeting(payload: Payload) {
     val dynamicListItem = payload.listItems
     val modifier = Modifier
-    var data: MutableState<Map<String, Any?>> = mutableStateOf(mutableMapOf("ashr" to "Ashr"))
+    val data:SnapshotStateMap<String,Any?> = mutableStateMapOf("ashr" to "Ashr")
+    //val data: MutableState<Map<String, Any?>> = mutableStateOf(mutableMapOf("ashr" to "Ashr"))
 
     for(item in dynamicListItem) {
         ConstructPart(
@@ -40,13 +116,26 @@ fun Greeting(payload: Payload) {
             data
         )
     }
+
+    LaunchedEffect(Unit) {
+        while(true) {
+            val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+            val now = Calendar.getInstance()
+            //val map = data as HashMap<String, Any?>
+            data.put("remainingTime",sdf.format(now.time))
+            //data.setValue("remainingTime",sdf.format(now.time))
+            delay(1000)
+        }
+    }
+
 }
+
 
 val payloadMajidTv1 = """
 {
    "listItems":[
       {
-         "type":"IMAGE",
+         "type":"GLIDE_IMAGE",
          "message":"Hello Here",
          "props":{"contentScale":"FillWidth","fillMaxWidth":true},
          "backgroundColor": "GREEN"
@@ -108,6 +197,7 @@ val payloadMajidTv1 = """
                 "listItems":[
                     {
                         "type":"TEXT",
+                        "name":"remainingTime",
                         "message":"Subuh - 02:20:34",
                         "textAlign":"START",
                         "maxLines":1,

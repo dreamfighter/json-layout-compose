@@ -4,6 +4,8 @@ enum class Type {
     TEXT,
     BUTTON,
     IMAGE,
+    VIDEO,
+    GLIDE_IMAGE,
     COLUMN,
     ROW,
     BOX,

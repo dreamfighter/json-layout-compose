@@ -16,18 +16,26 @@ import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.example.dynamicitemlazycolumn.R
 import id.dreamfighter.android.compose.tojson.ui.model.parts.*
 import id.dreamfighter.android.compose.tojson.ui.model.type.Align
@@ -37,21 +45,21 @@ import id.dreamfighter.android.compose.tojson.ui.model.utils.color
 import id.dreamfighter.android.compose.tojson.ui.model.utils.createModifier
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class)
 @Composable
 fun ConstructPart(
     listItems: ListItems,
     modifier: Modifier = Modifier,
-    data: MutableState<Map<String,Any?>> = mutableStateOf(mutableMapOf()),
+    data: SnapshotStateMap<String,Any?> = SnapshotStateMap<String,Any?>(),
     event:(String,Any) -> Unit = {_,_ ->}
 ) {
     when (listItems.type) {
         Type.TEXT -> {
             val textPart = listItems as Text
             var partModifier = modifier
-            Log.d("TEXT","${textPart.name}=>${data.value[textPart.name]}")
-            val text = if(data.value[textPart.name]!=null){
-                data.value[textPart.name] as String
+            Log.d("TEXT","${textPart.name}=>${data[textPart.name]}")
+            val text = if(data[textPart.name]!=null){
+                data[textPart.name] as String
             }else{
                 textPart.message
             }
@@ -208,14 +216,66 @@ fun ConstructPart(
             var partModifier = modifier
             val image: Painter = painterResource(id = R.drawable.temp_masjid_img)
 
-            if(imagePart.props?.get("contentScale") == "FillWidth"){
+            if(imagePart.props["contentScale"] == "FillWidth"){
 
                 contentScale = ContentScale.FillWidth
             }
-            if(imagePart.props?.get("fillMaxWidth") == true){
+            if(imagePart.props["fillMaxWidth"] == true){
                 partModifier = partModifier.fillMaxWidth()
             }
             Image(image , "", modifier = partModifier, contentScale = contentScale)
+        }
+
+        Type.VIDEO -> {
+            var contentScale = ContentScale.Fit
+            val imagePart = listItems as Image
+            val imageAlign = when (imagePart.imageAlign) {
+                Align.START -> Alignment.TopStart
+                Align.END -> Alignment.BottomEnd
+                else -> Alignment.Center
+            }
+            var partModifier = modifier
+            val image: Painter = painterResource(id = R.drawable.temp_masjid_img)
+
+            if(imagePart.props["contentScale"] == "FillWidth"){
+
+                contentScale = ContentScale.FillWidth
+            }
+            if(imagePart.props["fillMaxWidth"] == true){
+                partModifier = partModifier.fillMaxWidth()
+            }
+            Image(image , "", modifier = partModifier, contentScale = contentScale)
+        }
+
+        Type.GLIDE_IMAGE -> {
+            var contentScale = ContentScale.Fit
+            val imagePart = listItems as GlideImagePart
+            val imageAlign = when (imagePart.imageAlign) {
+                Align.START -> Alignment.TopStart
+                Align.END -> Alignment.BottomEnd
+                else -> Alignment.Center
+            }
+            var partModifier = modifier
+            val image: Painter = painterResource(id = R.drawable.temp_masjid_img)
+
+            if(imagePart.props["contentScale"] == "FillWidth"){
+
+                contentScale = ContentScale.FillWidth
+            }
+            if(imagePart.props["fillMaxWidth"] == true){
+                partModifier = partModifier.fillMaxWidth()
+            }
+
+            if(imagePart.glideUrl!=null){
+                GlideImage(
+                    model = imagePart.glideUrl,
+                    modifier = partModifier,
+                    contentDescription = "", contentScale = contentScale
+                )
+            }else {
+                Image(image , "", modifier = partModifier, contentScale = contentScale)
+            }
+            //Image(image , "", modifier = partModifier, contentScale = contentScale)
         }
 
         Type.BOX -> {
