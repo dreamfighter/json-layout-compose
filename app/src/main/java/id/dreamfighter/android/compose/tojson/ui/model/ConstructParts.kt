@@ -266,9 +266,30 @@ fun ConstructPart(
                 partModifier = partModifier.fillMaxWidth()
             }
 
-            if(imagePart.glideUrl!=null){
+            Log.d("GLIDE_IMAGE","GLIDE_IMAGE  "+imagePart.name)
+
+            if(imagePart.glideUrl!=null || data[imagePart.name]!=null){
+                val builder = LazyHeaders.Builder()
+
+                val values = data[imagePart.name] as Map<String,Any?>
+                val url = if(imagePart.glideUrl!=null){
+                    imagePart.glideUrl
+                }else{
+                    values["url"].toString()
+                }
+                if(values["headers"]!=null){
+                    val headers = values["headers"] as Map<String,String>
+                    headers.forEach { (key, value) ->
+                        builder.addHeader(key, value)
+                    }
+                }
+
+                val glideUrl = GlideUrl(url,
+                    builder.build()
+                )
+
                 GlideImage(
-                    model = imagePart.glideUrl,
+                    model = glideUrl,
                     modifier = partModifier,
                     contentDescription = "", contentScale = contentScale
                 )

@@ -117,14 +117,21 @@ fun Greeting(payload: Payload) {
         )
     }
 
+    val imgList = listOf<String>("https://img.freepik.com/free-vector/islamic-with-mosque-paper-style-design_1017-30710.jpg?w=1380&t=st=1682645647~exp=1682646247~hmac=30d6097c3c7b641df0ba3abcd1c6b2b228f8341ae11e22410c244b9ce4b778d2",
+    "https://img.freepik.com/premium-psd/3d-rendering-ramadan-kareem-with-crescent-moon-star_8306-952.jpg?w=1380")
+
+    var i = 0
     LaunchedEffect(Unit) {
         while(true) {
             val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
             val now = Calendar.getInstance()
-            //val map = data as HashMap<String, Any?>
+            val map = HashMap<String, Any?>()
+            map.put("url",imgList[i % 2])
             data.put("remainingTime",sdf.format(now.time))
+            data.put("backgroundImg",map)
+            i++
             //data.setValue("remainingTime",sdf.format(now.time))
-            delay(1000)
+            delay(10000)
         }
     }
 
@@ -136,6 +143,7 @@ val payloadMajidTv1 = """
    "listItems":[
       {
          "type":"GLIDE_IMAGE",
+         "name":"backgroundImg",
          "message":"Hello Here",
          "props":{"contentScale":"FillWidth","fillMaxWidth":true},
          "backgroundColor": "GREEN"
