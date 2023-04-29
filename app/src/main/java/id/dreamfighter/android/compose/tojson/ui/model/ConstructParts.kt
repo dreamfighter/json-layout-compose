@@ -3,7 +3,9 @@ package id.dreamfighter.android.compose.tojson.ui.model
 import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -51,7 +53,7 @@ fun ConstructPart(
     listItems: ListItems,
     modifier: Modifier = Modifier,
     data: SnapshotStateMap<String,Any?> = SnapshotStateMap<String,Any?>(),
-    event:(String,Any) -> Unit = {_,_ ->}
+    event:(Map<String,Any>) -> Unit = {_ ->}
 ) {
     when (listItems.type) {
         Type.TEXT -> {
@@ -159,33 +161,82 @@ fun ConstructPart(
         }
 
         Type.ANIMATED_VISIBILITY -> {
+            val animVisibleState = remember { MutableTransitionState(false) }
+                .apply { targetState = true }
             var visible by remember { mutableStateOf(false) }
+            var prevState by remember { mutableStateOf(
+                EnterExitState.PostExit) }
             val animated = listItems as AnimatedVisibility
             val items = animated.listItems
 
             LaunchedEffect(Unit) {
                 while(true) {
                     visible = !visible
-                    delay(10000)
+                    val map = mapOf<String,Any>(
+                        "name" to animated.name,
+                        "visible" to visible)
+                    if(visible) {
+                        delay(animated.enterDelay)
+                    }else{
+                        delay(animated.exitDelay)
+                    }
+                    event(map)
+                }
+            }
+            var enterAnimation = EnterTransition.None
+            var exitAnimation = ExitTransition.None
+            if(animated.animationType.isNotEmpty()){
+                animated.animationType.forEach {
+                    enterAnimation += when(it){
+                        "SLIDE_RIGHT" -> slideInHorizontally(animationSpec = tween(durationMillis = 200)) { fullWidth ->
+                            // Offsets the content by 1/3 of its width to the left, and slide towards right
+                            // Overwrites the default animation with tween for this slide animation.
+                            -fullWidth
+                        }
+                        "FADE" -> fadeIn(
+                            // Overwrites the default animation with tween
+                            animationSpec = tween(durationMillis = 200)
+                        )
+                        else -> slideInHorizontally(animationSpec = tween(durationMillis = 200)) { fullWidth ->
+                            // Offsets the content by 1/3 of its width to the left, and slide towards right
+                            // Overwrites the default animation with tween for this slide animation.
+                            -fullWidth
+                        }
+                    }
+
+                    exitAnimation += when(it){
+                        "SLIDE_RIGHT" -> slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh)) { fullWidth->
+                            // Overwrites the ending position of the slide-out to 200 (pixels) to the right
+                            -fullWidth
+                        }
+                        "FADE" -> fadeOut()
+                        else -> slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh)) { fullWidth->
+                            // Overwrites the ending position of the slide-out to 200 (pixels) to the right
+                            -fullWidth
+                        }
+                    }
                 }
             }
 
             AnimatedVisibility(
                 visible = visible,
-                enter = slideInHorizontally(animationSpec = tween(durationMillis = 200)) { fullWidth ->
-                    // Offsets the content by 1/3 of its width to the left, and slide towards right
-                    // Overwrites the default animation with tween for this slide animation.
-                    -fullWidth
-                } + fadeIn(
-                    // Overwrites the default animation with tween
-                    animationSpec = tween(durationMillis = 200)
-                ),
-                exit = slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh)) {fullWidth->
-                    // Overwrites the ending position of the slide-out to 200 (pixels) to the right
-                    -fullWidth
-                } + fadeOut()
+                enter = enterAnimation,
+                exit = exitAnimation
             ) {
                 // Content that needs to appear/disappear goes here:
+
+                //Log.d("EVENT","${animated.name} ${transition.currentState} ${transition.targetState}")
+
+                val map = mapOf<String,Any>(
+                    "name" to animated.name,
+                    "currentState" to transition.currentState.name,
+                    "targetState" to transition.targetState.name)
+
+                if(prevState!=transition.targetState) {
+                    prevState = transition.targetState
+
+                }
+
                 items?.let {
                     for (item in items) {
                         item.props.forEach { (key, value) ->

@@ -2,6 +2,7 @@ package id.dreamfighter.android.compose.tojson.sample
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
@@ -109,27 +110,33 @@ fun Greeting(payload: Payload) {
     val data:SnapshotStateMap<String,Any?> = mutableStateMapOf("ashr" to "Ashr")
     //val data: MutableState<Map<String, Any?>> = mutableStateOf(mutableMapOf("ashr" to "Ashr"))
 
+
+    val imgList = listOf<String>("https://img.freepik.com/free-vector/islamic-with-mosque-paper-style-design_1017-30710.jpg?w=1380&t=st=1682645647~exp=1682646247~hmac=30d6097c3c7b641df0ba3abcd1c6b2b228f8341ae11e22410c244b9ce4b778d2",
+        "https://img.freepik.com/premium-psd/3d-rendering-ramadan-kareem-with-crescent-moon-star_8306-952.jpg?w=1380")
+    var i = 0
+
     for(item in dynamicListItem) {
         ConstructPart(
             item,
             modifier,
             data
-        )
+        ){
+            Log.d("EVENT","${it["name"]} ${it["targetState"]}")
+            if(it["name"] == "backgroundImgAnim" && it["visible"] == false){
+                val map = HashMap<String, Any?>()
+                map.put("url",imgList[i % 2])
+                data.put("backgroundImg",map)
+                i++
+            }
+        }
     }
 
-    val imgList = listOf<String>("https://img.freepik.com/free-vector/islamic-with-mosque-paper-style-design_1017-30710.jpg?w=1380&t=st=1682645647~exp=1682646247~hmac=30d6097c3c7b641df0ba3abcd1c6b2b228f8341ae11e22410c244b9ce4b778d2",
-    "https://img.freepik.com/premium-psd/3d-rendering-ramadan-kareem-with-crescent-moon-star_8306-952.jpg?w=1380")
-
-    var i = 0
     LaunchedEffect(Unit) {
         while(true) {
             val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
             val now = Calendar.getInstance()
-            val map = HashMap<String, Any?>()
-            map.put("url",imgList[i % 2])
             data.put("remainingTime",sdf.format(now.time))
-            data.put("backgroundImg",map)
-            i++
+
             //data.setValue("remainingTime",sdf.format(now.time))
             delay(10000)
         }
@@ -142,11 +149,19 @@ val payloadMajidTv1 = """
 {
    "listItems":[
       {
+      "type":"ANIMATED_VISIBILITY",
+      "name":"backgroundImgAnim",
+      "exitDelay":500,
+      "animationType":["FADE"],
+      "listItems":[
+        {
          "type":"GLIDE_IMAGE",
          "name":"backgroundImg",
          "message":"Hello Here",
          "props":{"contentScale":"FillWidth","fillMaxWidth":true},
          "backgroundColor": "GREEN"
+        }
+      ]
       },
       {
         "type":"COLUMN",
@@ -202,6 +217,7 @@ val payloadMajidTv1 = """
                 "props":{"fillMaxWidth":true, "fillWeight":1}
             },{
                 "type":"ANIMATED_VISIBILITY",
+                "animationType":["SLIDE_RIGHT","FADE"],
                 "listItems":[
                     {
                         "type":"TEXT",
