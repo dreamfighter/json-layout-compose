@@ -1,6 +1,9 @@
 package id.dreamfighter.android.compose.tojson.ui.model
 
+import android.net.Uri
 import android.util.Log
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.MutableTransitionState
@@ -26,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
@@ -33,6 +37,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -279,8 +294,8 @@ fun ConstructPart(
 
         Type.VIDEO -> {
             var contentScale = ContentScale.Fit
-            val imagePart = listItems as Image
-            val imageAlign = when (imagePart.imageAlign) {
+            val videoPart = listItems as Video
+            val imageAlign = when (videoPart.imageAlign) {
                 Align.START -> Alignment.TopStart
                 Align.END -> Alignment.BottomEnd
                 else -> Alignment.Center
@@ -288,14 +303,21 @@ fun ConstructPart(
             var partModifier = modifier
             val image: Painter = painterResource(id = R.drawable.temp_masjid_img)
 
-            if(imagePart.props["contentScale"] == "FillWidth"){
+            if(videoPart.props["contentScale"] == "FillWidth"){
 
                 contentScale = ContentScale.FillWidth
             }
-            if(imagePart.props["fillMaxWidth"] == true){
+            if(videoPart.props["fillMaxWidth"] == true){
                 partModifier = partModifier.fillMaxWidth()
             }
-            Image(image , "", modifier = partModifier, contentScale = contentScale)
+            val uri = if(data[videoPart.name]!=null){
+                val map = data[videoPart.name] as Map<*, *>
+                "${map["url"]}"
+            }else{
+                videoPart.url
+            }
+            VideoPlayer(uri = Uri.parse(uri))
+            //Image(image , "", modifier = partModifier, contentScale = contentScale)
         }
 
         Type.GLIDE_IMAGE -> {
@@ -323,11 +345,7 @@ fun ConstructPart(
                 val builder = LazyHeaders.Builder()
 
                 val values = data[imagePart.name] as Map<String,Any?>
-                val url = if(imagePart.glideUrl!=null){
-                    imagePart.glideUrl
-                }else{
-                    values["url"].toString()
-                }
+                val url = imagePart.glideUrl ?: values["url"].toString()
                 if(values["headers"]!=null){
                     val headers = values["headers"] as Map<String,String>
                     headers.forEach { (key, value) ->
@@ -495,5 +513,49 @@ fun ConstructPart(
                 }
             }
         }
+    }
+}
+
+@Composable
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+fun VideoPlayer(uri: Uri) {
+    val context = LocalContext.current
+
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context)
+            .build()
+            .apply {
+                val defaultDataSourceFactory = DefaultHttpDataSource.Factory()
+                //val defaultDataSourceFactory = DefaultDataSource.Factory(context)
+
+                val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(
+                    context,
+                    defaultDataSourceFactory
+                )
+                val source = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(uri))
+
+                setMediaSource(source)
+                prepare()
+            }
+    }
+
+    exoPlayer.playWhenReady = true
+    exoPlayer.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+    exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+
+    DisposableEffect(
+        AndroidView(factory = {
+            PlayerView(context).apply {
+                hideController()
+                useController = false
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+
+                player = exoPlayer
+                layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            }
+        })
+    ) {
+        onDispose { exoPlayer.release() }
     }
 }

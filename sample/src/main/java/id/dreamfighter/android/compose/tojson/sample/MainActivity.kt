@@ -155,13 +155,20 @@ val payloadMajidTv1 = """
       "animationType":["FADE"],
       "listItems":[
         {
-         "type":"GLIDE_IMAGE",
+         "type":"VIDEO",
          "name":"backgroundImg",
          "message":"Hello Here",
          "props":{"contentScale":"FillWidth","fillMaxWidth":true},
          "backgroundColor": "GREEN"
         }
       ]
+      },
+      {
+         "type":"VIDEO",
+         "name":"backgroundImg1",
+         "url":"https://file-examples.com/storage/fe21053bab6446bba9a0947/2017/04/file_example_MP4_640_3MG.mp4",
+         "props":{"contentScale":"FillWidth","fillMaxWidth":true},
+         "backgroundColor": "GREEN"
       },
       {
         "type":"COLUMN",
