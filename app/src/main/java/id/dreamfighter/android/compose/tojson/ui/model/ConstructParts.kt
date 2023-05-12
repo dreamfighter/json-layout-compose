@@ -74,7 +74,7 @@ fun ConstructPart(
         Type.TEXT -> {
             val textPart = listItems as Text
             var partModifier = modifier
-            Log.d("TEXT","${textPart.name}=>${data[textPart.name]}")
+            //Log.d("TEXT","${textPart.name}=>${data[textPart.name]}")
             val text = if(data[textPart.name]!=null){
                 data[textPart.name] as String
             }else{
@@ -109,12 +109,12 @@ fun ConstructPart(
             }
 
             textPart.props.forEach { (key, value) ->
-                Log.d("PROPS","$key => $value")
+                //Log.d("PROPS","$key => $value")
                 when(key){
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
                     "padding" -> {
                         val padding = value as Map<String,Double>
-                        Log.d("PADDING","${padding["start"]}")
+                        //Log.d("PADDING","${padding["start"]}")
                         padding["start"]?.let {
                             partModifier = partModifier.padding(start = it.dp)
                         }
@@ -139,7 +139,7 @@ fun ConstructPart(
                     }
                     "animated" -> {
                         val animated = value as Map<String,String>
-                        Log.d("PADDING","${animated["type"]}")
+                        //Log.d("PADDING","${animated["type"]}")
                         when("${animated["type"]}"){
                             "scroll" -> {
                                 val scrollState = rememberScrollState()
@@ -233,32 +233,45 @@ fun ConstructPart(
                 }
             }
 
-            AnimatedVisibility(
-                visible = visible,
-                enter = enterAnimation,
-                exit = exitAnimation
-            ) {
-                // Content that needs to appear/disappear goes here:
-
-                //Log.d("EVENT","${animated.name} ${transition.currentState} ${transition.targetState}")
-
-                val map = mapOf<String,Any>(
-                    "name" to animated.name,
-                    "currentState" to transition.currentState.name,
-                    "targetState" to transition.targetState.name)
-
-                if(prevState!=transition.targetState) {
-                    prevState = transition.targetState
-
+            var hidden = false
+            if(data[animated.name]!=null){
+                val animateData = data[animated.name] as Map<*, *>
+                if(animateData["hidden"]!=null) {
+                    hidden = animateData["hidden"] as Boolean
                 }
+            }
 
-                items?.let {
-                    for (item in items) {
-                        item.props.forEach { (key, value) ->
-                            Log.d("PROPS","$key => $value")
+            Log.d("IMAGE","${animated.name} hidden $hidden")
 
+            if(!hidden) {
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = enterAnimation,
+                    exit = exitAnimation
+                ) {
+                    // Content that needs to appear/disappear goes here:
+
+                    //Log.d("EVENT","${animated.name} ${transition.currentState} ${transition.targetState}")
+
+                    val map = mapOf<String, Any>(
+                        "name" to animated.name,
+                        "currentState" to transition.currentState.name,
+                        "targetState" to transition.targetState.name
+                    )
+
+                    if (prevState != transition.targetState) {
+                        prevState = transition.targetState
+
+                    }
+
+                    items?.let {
+                        for (item in items) {
+                            item.props.forEach { (key, value) ->
+                                Log.d("PROPS", "$key => $value")
+
+                            }
+                            ConstructPart(item, modifier = modifier, data)
                         }
-                        ConstructPart(item, modifier = modifier,data)
                     }
                 }
             }
@@ -289,7 +302,17 @@ fun ConstructPart(
             if(imagePart.props["fillMaxWidth"] == true){
                 partModifier = partModifier.fillMaxWidth()
             }
-            Image(image , "", modifier = partModifier, contentScale = contentScale)
+            var hidden = false
+            if(data[imagePart.name]!=null){
+                val animateData = data[imagePart.name] as Map<*, *>
+                if(animateData["hidden"]!=null) {
+                    hidden = animateData["hidden"] as Boolean
+                }
+            }
+
+            if(!hidden) {
+                Image(image, "", modifier = partModifier, contentScale = contentScale)
+            }
         }
 
         Type.VIDEO -> {
@@ -316,7 +339,20 @@ fun ConstructPart(
             }else{
                 videoPart.url
             }
-            VideoPlayer(uri = Uri.parse(uri))
+
+
+            var hidden = false
+            if(data[videoPart.name]!=null){
+                val animateData = data[videoPart.name] as Map<*, *>
+                if(animateData["hidden"]!=null) {
+                    hidden = animateData["hidden"] as Boolean
+                }
+            }
+
+            if(!hidden && uri!=null) {
+                VideoPlayer(uri = Uri.parse(uri))
+            }
+
             //Image(image , "", modifier = partModifier, contentScale = contentScale)
         }
 
@@ -341,29 +377,40 @@ fun ConstructPart(
 
             Log.d("GLIDE_IMAGE","GLIDE_IMAGE  "+imagePart.name)
 
-            if(imagePart.glideUrl!=null || data[imagePart.name]!=null){
-                val builder = LazyHeaders.Builder()
-
-                val values = data[imagePart.name] as Map<String,Any?>
-                val url = imagePart.glideUrl ?: values["url"].toString()
-                if(values["headers"]!=null){
-                    val headers = values["headers"] as Map<String,String>
-                    headers.forEach { (key, value) ->
-                        builder.addHeader(key, value)
-                    }
+            var hidden = false
+            if(data[imagePart.name]!=null){
+                val animateData = data[imagePart.name] as Map<*, *>
+                if(animateData["hidden"]!=null) {
+                    hidden = animateData["hidden"] as Boolean
                 }
+            }
 
-                val glideUrl = GlideUrl(url,
-                    builder.build()
-                )
+            if(!hidden) {
+                if (imagePart.glideUrl != null || data[imagePart.name] != null) {
+                    val builder = LazyHeaders.Builder()
 
-                GlideImage(
-                    model = glideUrl,
-                    modifier = partModifier,
-                    contentDescription = "", contentScale = contentScale
-                )
-            }else {
-                Image(image , "", modifier = partModifier, contentScale = contentScale)
+                    val values = data[imagePart.name] as Map<String, Any?>
+                    val url = imagePart.glideUrl ?: values["url"].toString()
+                    if (values["headers"] != null) {
+                        val headers = values["headers"] as Map<String, String>
+                        headers.forEach { (key, value) ->
+                            builder.addHeader(key, value)
+                        }
+                    }
+
+                    val glideUrl = GlideUrl(
+                        url,
+                        builder.build()
+                    )
+
+                    GlideImage(
+                        model = glideUrl,
+                        modifier = partModifier,
+                        contentDescription = "", contentScale = contentScale
+                    )
+                } else {
+                    Image(image, "", modifier = partModifier, contentScale = contentScale)
+                }
             }
             //Image(image , "", modifier = partModifier, contentScale = contentScale)
         }
@@ -373,9 +420,9 @@ fun ConstructPart(
             val items = box.listItems
             var partModifier = modifier
 
-            Log.d("BOX_PROPS","${box.props}")
+            //Log.d("BOX_PROPS","${box.props}")
             box.props.forEach { (key, value) ->
-                Log.d("BOX_PROPS","$key => $value")
+                //Log.d("BOX_PROPS","$key => $value")
                 when(key){
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
                     "background" -> partModifier = partModifier.background(value.toString().color)
@@ -391,7 +438,7 @@ fun ConstructPart(
                     for (item in items) {
                         val modifier = Modifier
                         item.props.forEach { (key, value) ->
-                            Log.d("PROPS","$key => $value")
+                            //Log.d("PROPS","$key => $value")
                         }
                         ConstructPart(item, modifier = modifier,data)
                     }
@@ -419,7 +466,7 @@ fun ConstructPart(
                 for (item in items) {
                     var partModifier = createModifier(listItems = item)
                     item.props.forEach { (key, value) ->
-                        Log.d("COLUMN_PROPS","$key => $value")
+                        //Log.d("COLUMN_PROPS","$key => $value")
                         when(key){
                             "align" ->  partModifier = Modifier.align(alignment = when(value) {
                                 "START" -> Alignment.Start
@@ -439,7 +486,7 @@ fun ConstructPart(
             var partModifier = modifier
 
             row.props.forEach { (key, value) ->
-                Log.d("PROPS","$key => $value")
+                //Log.d("PROPS","$key => $value")
                 when(key){
                     "height" -> partModifier = partModifier.height((value as Double).dp)
                     "background" -> partModifier = partModifier.background(value.toString().color)
@@ -453,7 +500,7 @@ fun ConstructPart(
                 for (item in items) {
                     var modifierItem = createModifier(item)
                     item.props.forEach { (key, value) ->
-                        Log.d("PROPS","$key => $value")
+                        //Log.d("PROPS","$key => $value")
                         when(key){
                             "weight" -> modifierItem = modifierItem.weight((value as Double).toFloat())
                             "fillWeight" -> modifierItem = modifierItem.weight((value as Double).toFloat(),fill = true)
@@ -488,7 +535,7 @@ fun ConstructPart(
             }
 
             card.props.forEach { (key, value) ->
-                Log.d("CARD_PROPS","$key => $value")
+                //Log.d("CARD_PROPS","$key => $value")
                 when(key){
                     "height" -> partModifier = partModifier.height((value as Double).dp)
                     "background" -> partModifier = partModifier.background(value.toString().color)
@@ -503,7 +550,7 @@ fun ConstructPart(
                 for (item in items) {
                     var modifierItem = Modifier.background("#00FFFFFF".color)
                     item.props.forEach { (key, value) ->
-                        Log.d("CARD_PROPS","$key => $value")
+                        //Log.d("CARD_PROPS","$key => $value")
                         when(key) {
                             "background" -> modifierItem =
                                 modifierItem.background(value.toString().color)

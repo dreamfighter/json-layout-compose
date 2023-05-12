@@ -115,6 +115,8 @@ fun Greeting(payload: Payload) {
         "https://img.freepik.com/premium-psd/3d-rendering-ramadan-kareem-with-crescent-moon-star_8306-952.jpg?w=1380")
     var i = 0
 
+    data["backgroundImg1"] = mapOf("hidden" to true)
+
     for(item in dynamicListItem) {
         ConstructPart(
             item,
@@ -155,7 +157,7 @@ val payloadMajidTv1 = """
       "animationType":["FADE"],
       "listItems":[
         {
-         "type":"VIDEO",
+         "type":"GLIDE_IMAGE",
          "name":"backgroundImg",
          "message":"Hello Here",
          "props":{"contentScale":"FillWidth","fillMaxWidth":true},
