@@ -241,7 +241,7 @@ fun ConstructPart(
                 }
             }
 
-            Log.d("IMAGE","${animated.name} hidden $hidden")
+            //Log.d("IMAGE","${animated.name} hidden $hidden")
 
             if(!hidden) {
                 AnimatedVisibility(
@@ -267,8 +267,7 @@ fun ConstructPart(
                     items?.let {
                         for (item in items) {
                             item.props.forEach { (key, value) ->
-                                Log.d("PROPS", "$key => $value")
-
+                                //Log.d("PROPS", "$key => $value")
                             }
                             ConstructPart(item, modifier = modifier, data)
                         }
@@ -375,7 +374,7 @@ fun ConstructPart(
                 partModifier = partModifier.fillMaxWidth()
             }
 
-            Log.d("GLIDE_IMAGE","GLIDE_IMAGE  "+imagePart.name)
+            //Log.d("GLIDE_IMAGE","GLIDE_IMAGE  "+imagePart.name)
 
             var hidden = false
             if(data[imagePart.name]!=null){

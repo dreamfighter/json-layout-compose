@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -16,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import id.dreamfighter.android.compose.tojson.Payload
 import id.dreamfighter.android.compose.tojson.loadPayload
 import id.dreamfighter.android.compose.tojson.ui.model.ConstructPart
@@ -31,7 +34,10 @@ class MainActivity : ComponentActivity() {
 
         loadPayload(payloadMajidTv1)?.let{
             setContent {
-                Greeting(payload = it)
+                Box(modifier = Modifier.background(color = Color.White)){
+                    Greeting(payload = it)
+                }
+
             }
         }
     }
@@ -200,7 +206,7 @@ val payloadMajidTv1 = """
                                  }
                             },{
                                  "type":"TEXT",
-                                 "message":"Masjid AT-Taqwa Pesona Ciganitri",
+                                 "message":"Masjid AT-Taqwa Pesona Ciganitri ${2+2}",
                                  "textAlign":"CENTER",
                                  "color":"#FFFFFFFF",
                                  "textFont":30,
