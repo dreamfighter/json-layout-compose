@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import id.dreamfighter.android.compose.tojson.Payload
 import id.dreamfighter.android.compose.tojson.loadPayload
 import id.dreamfighter.android.compose.tojson.ui.model.ConstructPart
+import id.dreamfighter.android.compose.tojson.sample.ui.theme.CustomFont
+import id.dreamfighter.android.compose.tojson.sample.ui.theme.getCustomFont
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -113,7 +115,8 @@ fun String.lefpad(length:Int,additional:String):String{
 fun Greeting(payload: Payload) {
     val dynamicListItem = payload.listItems
     val modifier = Modifier
-    val data:SnapshotStateMap<String,Any?> = mutableStateMapOf("ashr" to "Ashr")
+    val texts = mapOf<String,Any>("text" to "Ashr", "fontFamily" to CustomFont.getCustomFont())
+    val data:SnapshotStateMap<String,Any?> = mutableStateMapOf("ashr" to texts)
     //val data: MutableState<Map<String, Any?>> = mutableStateOf(mutableMapOf("ashr" to "Ashr"))
 
 
@@ -143,7 +146,8 @@ fun Greeting(payload: Payload) {
         while(true) {
             val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
             val now = Calendar.getInstance()
-            data.put("remainingTime",sdf.format(now.time))
+            val texts = mapOf<String,Any>("text" to sdf.format(now.time), "fontFamily" to CustomFont)
+            data.put("remainingTime",texts)
 
             //data.setValue("remainingTime",sdf.format(now.time))
             delay(10000)
@@ -208,6 +212,7 @@ val payloadMajidTv1 = """
                                  "type":"TEXT",
                                  "message":"Masjid AT-Taqwa Pesona Ciganitri ${2+2}",
                                  "textAlign":"CENTER",
+                                 
                                  "color":"#FFFFFFFF",
                                  "textFont":30,
                                  "props":{
@@ -292,6 +297,7 @@ val payloadMajidTv1 = """
                                                 "type":"TEXT",
                                                 "name":"ashr",
                                                 "message":"Fajr",
+                                                "fontWeight":"BOLD",
                                                 "color":"#FFFFFFFF",
                                                 "textFont":20
                                             },{

@@ -1,4 +1,4 @@
-package id.dreamfighter.android.compose.tojson.ui.theme
+package id.dreamfighter.android.compose.tojson.sample.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme

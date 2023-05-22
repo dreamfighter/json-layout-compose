@@ -1,14 +1,12 @@
 package id.dreamfighter.android.compose.tojson.ui.model
 
 import android.net.Uri
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -26,13 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontListFontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,7 +45,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
-import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.load.model.GlideUrl
@@ -60,6 +56,7 @@ import id.dreamfighter.android.compose.tojson.ui.model.type.FontSize
 import id.dreamfighter.android.compose.tojson.ui.model.type.Type
 import id.dreamfighter.android.compose.tojson.ui.model.utils.color
 import id.dreamfighter.android.compose.tojson.ui.model.utils.createModifier
+import id.dreamfighter.android.compose.tojson.ui.theme.DefaultFont
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class)
@@ -74,9 +71,19 @@ fun ConstructPart(
         Type.TEXT -> {
             val textPart = listItems as Text
             var partModifier = modifier
+            var fontfamily = DefaultFont
             //Log.d("TEXT","${textPart.name}=>${data[textPart.name]}")
             val text = if(data[textPart.name]!=null){
-                data[textPart.name] as String
+                val datas = data[textPart.name] as Map<*,*>
+                if(datas["fonts"]!=null && textPart.fontFamily!=null){
+                    val fontFamilies = datas["fonts"] as Map<*,*>
+                    fontfamily = fontFamilies[textPart.fontFamily] as
+                            FontListFontFamily
+                }else if(datas["fontFamily"]!=null){
+                    fontfamily = datas["fontFamily"] as
+                            FontListFontFamily
+                }
+                datas["text"] as String
             }else{
                 textPart.message
             }
@@ -170,7 +177,8 @@ fun ConstructPart(
                 modifier = partModifier,
                 textAlign = textAlign,
                 fontSize = fontSize,
-                fontWeight = fontWeight
+                fontWeight = fontWeight,
+                fontFamily = fontfamily
             )
 
         }
