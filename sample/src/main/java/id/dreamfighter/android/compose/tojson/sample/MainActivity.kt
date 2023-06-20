@@ -113,6 +113,7 @@ fun String.lefpad(length:Int,additional:String):String{
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun Greeting(payload: Payload) {
+    Log.d("PAYLOAD","PAYLOAD")
     val dynamicListItem = payload.listItems
     val modifier = Modifier
     val texts = mapOf<String,Any>("text" to "Ashr", "fontFamily" to CustomFont.getCustomFont())
@@ -124,7 +125,7 @@ fun Greeting(payload: Payload) {
         "https://img.freepik.com/premium-psd/3d-rendering-ramadan-kareem-with-crescent-moon-star_8306-952.jpg?w=1380")
     var i = 0
 
-    data["backgroundImg1"] = mapOf("hidden" to true)
+    data["backgroundImg1"] = mutableStateMapOf("hidden" to true)
 
     for(item in dynamicListItem) {
         ConstructPart(
@@ -134,9 +135,9 @@ fun Greeting(payload: Payload) {
         ){
             Log.d("EVENT","${it["name"]} ${it["targetState"]}")
             if(it["name"] == "backgroundImgAnim" && it["visible"] == false){
-                val map = HashMap<String, Any?>()
-                map.put("url",imgList[i % 2])
-                data.put("backgroundImg",map)
+                val map = mutableStateMapOf<String, Any?>()
+                map["url"] = imgList[i % 2]
+                data["backgroundImg"] = map
                 i++
             }
         }
@@ -580,6 +581,7 @@ val payloadMajidTv1 = """
     },
     {
       "type": "ANIMATED_VISIBILITY",
+      "name":"animatedInfo",
       "enterDelay":10000,
       "exitDelay":60000,
       "animationType": [
@@ -597,6 +599,7 @@ val payloadMajidTv1 = """
           "listItems": [
             {
               "type": "TEXT",
+              "name": "fullInfo",
               "message":"this is info",
               "textFont": 30,
               "color": "#FFFFFF",
@@ -644,7 +647,7 @@ val payloadMajidTv1 = """
           "listItems": [
             {
               "type": "TEXT",
-              "name": "infoLeft",
+              "name": "infoRight",
               "message":"this is info",
               "textFont": 25,
               "color": "#FFFFFF",

@@ -68,7 +68,7 @@ import kotlinx.coroutines.delay
 fun ConstructPart(
     listItems: ListItems,
     modifier: Modifier = Modifier,
-    data: SnapshotStateMap<String,Any?> = SnapshotStateMap<String,Any?>(),
+    data: MutableMap<String,Any?> = mutableMapOf<String,Any?>(),
     event:(Map<String,Any>) -> Unit = {_ ->}
 ) {
     when (listItems.type) {
