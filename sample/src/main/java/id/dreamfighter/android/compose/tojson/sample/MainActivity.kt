@@ -159,189 +159,511 @@ fun Greeting(payload: Payload) {
 
 val payloadMajidTv1 = """
 {
-   "listItems":[
-      {
-      "type":"ANIMATED_VISIBILITY",
-      "name":"backgroundImgAnim",
-      "exitDelay":500,
-      "animationType":["FADE"],
-      "listItems":[
+  "listItems": [
+    {
+      "type": "ANIMATED_VISIBILITY",
+      "name": "backgroundImgAnim",
+      "exitDelay": 500,
+      "enterDelay": 20000,
+      "animationType": [
+        "FADE"
+      ],
+      "listItems": [
         {
-         "type":"GLIDE_IMAGE",
-         "name":"backgroundImg",
-         "message":"Hello Here",
-         "props":{"contentScale":"FillWidth","fillMaxWidth":true},
-         "backgroundColor": "GREEN"
+          "type": "GLIDE_IMAGE",
+          "name": "backgroundImg",
+          "message": "Hello Here",
+          "props": {
+            "contentScale": "FillWidth",
+            "fillMaxWidth": true
+          },
+          "backgroundColor": "GREEN"
         }
       ]
+    },
+    {
+      "type": "VIDEO",
+      "name": "backgroundImg1",
+      "url": "https://file-examples.com/storage/fe21053bab6446bba9a0947/2017/04/file_example_MP4_640_3MG.mp4",
+      "props": {
+        "contentScale": "FillWidth",
+        "fillMaxWidth": true
       },
-      {
-         "type":"VIDEO",
-         "name":"backgroundImg1",
-         "url":"https://file-examples.com/storage/fe21053bab6446bba9a0947/2017/04/file_example_MP4_640_3MG.mp4",
-         "props":{"contentScale":"FillWidth","fillMaxWidth":true},
-         "backgroundColor": "GREEN"
-      },
-      {
-        "type":"COLUMN",
-        "horizontalAlignment":"START",
-        "listItems":[
+      "backgroundColor": "GREEN"
+    },
+    {
+      "type": "COLUMN",
+      "horizontalAlignment": "START",
+      "listItems": [
+        {
+          "type": "BOX",
+          "props": {
+            "fillMaxWidth": true
+          },
+          "listItems": [
             {
-                "type":"BOX",
-                "props":{"fillMaxWidth":true},
-                "listItems":[
-                    {
-                        "type":"ROW",
-                        "props":{
-                            "height":90,
-                            "background":"#55000000",
-                            "align":"CENTER",
-                            "fillMaxWidth":true
-                        },
-                        "listItems":[
-                            {
-                                 "type":"TEXT",
-                                 "message":"Sabtu, 11 Mar 2023\n19 Sha'ban 1444",
-                                 "textAlign":"START",
-                                 "color":"#FFFFFFFF",
-                                 "textFont":20,
-                                 "props":{
-                                    "padding":{"start":16}
-                                 }
-                            },{
-                                 "type":"TEXT",
-                                 "message":"Masjid AT-Taqwa Pesona Ciganitri ${2+2}",
-                                 "textAlign":"CENTER",
-                                 
-                                 "color":"#FFFFFFFF",
-                                 "textFont":30,
-                                 "props":{
-                                    "padding":{"start":16,"end":16},
-                                    "fillWeight":1
-                                 }
-                            },{
-                                 "type":"TEXT",
-                                 "message":"11:50:00",
-                                 "textAlign":"CENTER",
-                                 "color":"#FFFFFFFF",
-                                 "textFont":50,
-                                 "props":{
-                                    "padding":{"end":16}
-                                 }
-                            }
-                        ]
+              "type": "ROW",
+              "props": {
+                "height": 90,
+                "background": "#55000000",
+                "align": "CENTER",
+                "fillMaxWidth": true
+              },
+              "listItems": [
+                {
+                  "type": "TEXT",
+                  "name": "date",
+                  "message": "Sabtu, 11 Mar 2023\n19 Sha'ban 1444",
+                  "textAlign": "START",
+                  "color": "#FFFFFFFF",
+                  "textFont": 20,
+                  "props": {
+                    "padding": {
+                      "start": 16
                     }
-                ]
-            },{
-                "type":"BOX",
-                "props":{"fillMaxWidth":true, "fillWeight":1}
-            },{
-                "type":"ANIMATED_VISIBILITY",
-                "animationType":["SLIDE_RIGHT","FADE"],
-                "listItems":[
-                    {
-                        "type":"TEXT",
-                        "name":"remainingTime",
-                        "message":"Subuh - 02:20:34",
-                        "textAlign":"START",
-                        "maxLines":1,
-                        "color":"#FFFFFFFF",
-                        "fontWeight":"BOLD",
-                        "textFont":25,
-                        "props":{
-                            "clip": {"type":"ROUND", "topEnd":24},
-                            "background":"#99D85A5C",
-                            "align": "START",
-                            "padding":{"start":16,"end":16},
-                            "animated":{"type":"visibility"}
-                        }
+                  }
+                },
+                {
+                  "type": "TEXT",
+                  "name": "masjidName",
+                  "message": "Masjid AT-Taqwa Pesona Ciganitri",
+                  "textAlign": "CENTER",
+                  "color": "#FFFFFFFF",
+                  "textFont": 30,
+                  "props": {
+                    "padding": {
+                      "start": 16,
+                      "end": 16
+                    },
+                    "fillWeight": 1
+                  }
+                },
+                {
+                  "type": "TEXT",
+                  "name": "currentTime",
+                  "message": "11:50:00",
+                  "textAlign": "CENTER",
+                  "color": "#FFFFFFFF",
+                  "textFont": 50,
+                  "props": {
+                    "padding": {
+                      "end": 16
                     }
-                ]
-            },{
-                "type":"TEXT",
-                "message":"Sabtu, 11 Mar 2023, 19 Sha'ban 1444, Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444",
-                "textAlign":"CENTER",
-                "maxLines":1,
-                "alignment":"CENTER",
-                "color":"#FF000000",
-                "fontWeight":"BOLD",
-                "textFont":20,
-                "props":{
-                    "background":"#99DDDDDD",
-                    "fillMaxWidth":true,
-                    "animated":{"type":"scroll"}
+                  }
                 }
-            },{
-                "type":"BOX",
-                "props":{"background":"#99DDDDDD"},
-                "listItems":[
-                    {
-                        "type":"ROW",
-                        "props":{
-                            "height":90,
-                            "align":"CENTER"
-                        },
-                        "listItems":[
-                            {
-                                "type":"CARD",
-                                "props":{
-                                    "weight":1,
-                                    "padding":{"start": 8, "end": 8}
-                                },
-                                "cardBackgroundColor":"#D85A5C",
-                                "listItems":[
-                                    {
-                                        "type":"COLUMN",
-                                        "listItems":[
-                                            {
-                                                "type":"TEXT",
-                                                "name":"ashr",
-                                                "message":"Fajr",
-                                                "fontWeight":"BOLD",
-                                                "color":"#FFFFFFFF",
-                                                "textFont":20
-                                            },{
-                                                "type":"TEXT",
-                                                "message":"04:30",
-                                                "textFont":30,
-                                                "props":{
-                                                    "background":"#FFFFFFFF",
-                                                    "fillMaxWidth":true
-                                                }
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
-                                "type":"CARD",
-                                "props":{
-                                    "weight":1,
-                                    "padding":{"start": 8, "end": 8},
-                                    "backgroundColor": "#D85A5C"
-                                },
-                                "listItems":[
-                                    {
-                                        "type":"COLUMN",
-                                        "listItems":[
-                                            {
-                                                "type":"TEXT",
-                                                "message":"Fajr"
-                                            },{
-                                                "type":"TEXT",
-                                                "message":"04:30"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
+              ]
             }
-         ]
-      }
-   ]
+          ]
+        },
+        {
+          "type": "BOX",
+          "props": {
+            "fillMaxWidth": true,
+            "fillWeight": 1
+          }
+        },
+        {
+          "type": "ANIMATED_VISIBILITY",
+          "animationType": [
+            "SLIDE_RIGHT",
+            "FADE"
+          ],
+          "listItems": [
+            {
+              "type": "TEXT",
+              "name": "remainingTime",
+              "message": "Subuh - 02:20:34",
+              "textAlign": "START",
+              "maxLines": 1,
+              "color": "#FFFFFFFF",
+              "fontWeight": "BOLD",
+              "textFont": 25,
+              "props": {
+                "clip": {
+                  "type": "ROUND",
+                  "topEnd": 24
+                },
+                "background": "#99D85A5C",
+                "align": "START",
+                "padding": {
+                  "start": 16,
+                  "end": 16
+                },
+                "animated": {
+                  "type": "visibility"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "TEXT",
+          "name": "info",
+          "message": "Sabtu, 11 Mar 2023, 19 Sha'ban 1444, Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444 Sabtu, 11 Mar 2023, 19 Sha'ban 1444",
+          "textAlign": "CENTER",
+          "maxLines": 1,
+          "alignment": "CENTER",
+          "color": "#FF000000",
+          "fontWeight": "BOLD",
+          "textFont": 20,
+          "props": {
+            "background": "#99DDDDDD",
+            "fillMaxWidth": true,
+            "animated": {
+              "type": "scroll"
+            }
+          }
+        },
+        {
+          "type": "BOX",
+          "props": {
+            "background": "#99DDDDDD"
+          },
+          "listItems": [
+            {
+              "type": "ROW",
+              "props": {
+                "height": 90,
+                "align": "CENTER"
+              },
+              "listItems": [
+                {
+                  "type": "CARD",
+                  "props": {
+                    "weight": 1,
+                    "padding": {
+                      "start": 8,
+                      "end": 8
+                    }
+                  },
+                  "cardBackgroundColor": "#D85A5C",
+                  "listItems": [
+                    {
+                      "type": "COLUMN",
+                      "listItems": [
+                        {
+                          "type": "TEXT",
+                          "name": "subuh",
+                          "message": "Fajr",
+                          "color": "#FFFFFFFF",
+                          "textFont": 20
+                        },
+                        {
+                          "type": "TEXT",
+                          "name": "subuhTime",
+                          "message": "04:30",
+                          "textFont": 30,
+                          "props": {
+                            "background": "#FFFFFFFF",
+                            "fillMaxWidth": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "CARD",
+                  "props": {
+                    "weight": 1,
+                    "padding": {
+                      "start": 8,
+                      "end": 8
+                    }
+                  },
+                  "cardBackgroundColor": "#D85A5C",
+                  "listItems": [
+                    {
+                      "type": "COLUMN",
+                      "listItems": [
+                        {
+                          "type": "TEXT",
+                          "name": "terbit",
+                          "message": "Fajr",
+                          "color": "#FFFFFFFF",
+                          "textFont": 20
+                        },
+                        {
+                          "type": "TEXT",
+                          "name": "terbitTime",
+                          "message": "04:30",
+                          "textFont": 30,
+                          "props": {
+                            "background": "#FFFFFFFF",
+                            "fillMaxWidth": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "CARD",
+                  "props": {
+                    "weight": 1,
+                    "padding": {
+                      "start": 8,
+                      "end": 8
+                    }
+                  },
+                  "cardBackgroundColor": "#D85A5C",
+                  "listItems": [
+                    {
+                      "type": "COLUMN",
+                      "listItems": [
+                        {
+                          "type": "TEXT",
+                          "name": "dhuha",
+                          "message": "Fajr",
+                          "color": "#FFFFFFFF",
+                          "textFont": 20
+                        },
+                        {
+                          "type": "TEXT",
+                          "name": "dhuhaTime",
+                          "message": "04:30",
+                          "textFont": 30,
+                          "props": {
+                            "background": "#FFFFFFFF",
+                            "fillMaxWidth": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "CARD",
+                  "props": {
+                    "weight": 1,
+                    "padding": {
+                      "start": 8,
+                      "end": 8
+                    }
+                  },
+                  "cardBackgroundColor": "#D85A5C",
+                  "listItems": [
+                    {
+                      "type": "COLUMN",
+                      "listItems": [
+                        {
+                          "type": "TEXT",
+                          "name": "dzuhur",
+                          "message": "Fajr",
+                          "color": "#FFFFFFFF",
+                          "textFont": 20
+                        },
+                        {
+                          "type": "TEXT",
+                          "name": "dzuhurTime",
+                          "message": "04:30",
+                          "textFont": 30,
+                          "props": {
+                            "background": "#FFFFFFFF",
+                            "fillMaxWidth": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "CARD",
+                  "props": {
+                    "weight": 1,
+                    "padding": {
+                      "start": 8,
+                      "end": 8
+                    }
+                  },
+                  "cardBackgroundColor": "#D85A5C",
+                  "listItems": [
+                    {
+                      "type": "COLUMN",
+                      "listItems": [
+                        {
+                          "type": "TEXT",
+                          "name": "ashar",
+                          "message": "Fajr",
+                          "color": "#FFFFFFFF",
+                          "textFont": 20
+                        },
+                        {
+                          "type": "TEXT",
+                          "name": "asharTime",
+                          "message": "04:30",
+                          "textFont": 30,
+                          "props": {
+                            "background": "#FFFFFFFF",
+                            "fillMaxWidth": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "CARD",
+                  "props": {
+                    "weight": 1,
+                    "padding": {
+                      "start": 8,
+                      "end": 8
+                    }
+                  },
+                  "cardBackgroundColor": "#D85A5C",
+                  "listItems": [
+                    {
+                      "type": "COLUMN",
+                      "listItems": [
+                        {
+                          "type": "TEXT",
+                          "name": "maghrib",
+                          "message": "Fajr",
+                          "color": "#FFFFFFFF",
+                          "textFont": 20
+                        },
+                        {
+                          "type": "TEXT",
+                          "name": "maghribTime",
+                          "message": "04:30",
+                          "textFont": 30,
+                          "props": {
+                            "background": "#FFFFFFFF",
+                            "fillMaxWidth": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "CARD",
+                  "props": {
+                    "weight": 1,
+                    "padding": {
+                      "start": 8,
+                      "end": 8
+                    }
+                  },
+                  "cardBackgroundColor": "#D85A5C",
+                  "listItems": [
+                    {
+                      "type": "COLUMN",
+                      "listItems": [
+                        {
+                          "type": "TEXT",
+                          "name": "isya",
+                          "message": "Fajr",
+                          "color": "#FFFFFFFF",
+                          "textFont": 20
+                        },
+                        {
+                          "type": "TEXT",
+                          "name": "isyaTime",
+                          "message": "04:30",
+                          "textFont": 30,
+                          "props": {
+                            "background": "#FFFFFFFF",
+                            "fillMaxWidth": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ANIMATED_VISIBILITY",
+      "enterDelay":10000,
+      "exitDelay":60000,
+      "animationType": [
+        "FADE"
+      ],
+      "listItems": [
+        {
+          "type": "BOX",
+          "props": {
+            "fillMaxWidth": true,
+            "fillMaxHeight": true,
+            "background": "#000000"
+          },
+          "contentAlignment":"CENTER",
+          "listItems": [
+            {
+              "type": "TEXT",
+              "message":"this is info",
+              "textFont": 30,
+              "color": "#FFFFFF",
+              "textAlign":"CENTER",
+              "props": {
+                "padding":{"bottom":8},
+                "fillMaxHeight": true,
+                "background": "#000000"
+              }
+            }
+          ]
+        },{
+          "type": "BOX",
+          "props": {
+            "fillMaxWidth": true,
+            "fillMaxHeight": true
+          },
+          "contentAlignment":"BOTTOM_START",
+          "listItems": [
+            {
+              "type": "TEXT",
+              "name": "infoLeft",
+              "message":"this is info",
+              "textFont": 25,
+              "color": "#FFFFFF",
+              "textAlign":"END",
+              "fontFamily":"CustomFont",
+              "props": {
+                "clip": {
+                  "type": "ROUND",
+                  "topEnd": 24
+                },
+                "background": "#99D85A5C",
+                "padding":{"start":8, "end":16}
+              }
+            }
+          ]
+        },{
+          "type": "BOX",
+          "props": {
+            "fillMaxWidth": true,
+            "fillMaxHeight": true
+          },
+          "contentAlignment":"BOTTOM_END",
+          "listItems": [
+            {
+              "type": "TEXT",
+              "name": "infoLeft",
+              "message":"this is info",
+              "textFont": 25,
+              "color": "#FFFFFF",
+              "textAlign":"END",
+              "fontFamily":"CustomFont",
+              "props": {
+                "clip": {
+                  "type": "ROUND",
+                  "topStart": 24
+                },
+                "background": "#99D85A5C",
+                "padding":{"start":8, "end":16}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
 """.trimIndent()
 

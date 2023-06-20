@@ -12,7 +12,7 @@ class Text(
     val color: String = "#FF000000",
     val maxLines:Int = 3,
     val fontWeight:String? = "NORMAL",
-    val fontFamily: String? = null,
+    var fontFamily: String? = null,
     alignment: Align = Align.CENTER,
     weight: Float = 0f,
     backgroundColor: ItemColor = ItemColor.NONE,

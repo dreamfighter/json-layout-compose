@@ -1,6 +1,7 @@
 package id.dreamfighter.android.compose.tojson.ui.model
 
 import android.net.Uri
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.animation.*
@@ -14,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Card
@@ -24,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -121,7 +125,6 @@ fun ConstructPart(
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
                     "padding" -> {
                         val padding = value as Map<String,Double>
-                        //Log.d("PADDING","${padding["start"]}")
                         padding["start"]?.let {
                             partModifier = partModifier.padding(start = it.dp)
                         }
@@ -136,11 +139,15 @@ fun ConstructPart(
                         when("${clip["type"]}"){
                             "ROUND" -> {
                                 var topEnd = 0.dp
+                                var topStart = 0.dp
                                 if(clip["topEnd"]!=null){
                                     topEnd = (clip["topEnd"] as Double).dp
                                 }
+                                if(clip["topStart"]!=null){
+                                    topStart = (clip["topStart"] as Double).dp
+                                }
                                 partModifier =
-                                    partModifier.clip(RoundedCornerShape(topEnd = topEnd))
+                                    partModifier.clip(RoundedCornerShape(topEnd = topEnd, topStart = topStart))
                             }
                         }
                     }
@@ -432,14 +439,23 @@ fun ConstructPart(
                 //Log.d("BOX_PROPS","$key => $value")
                 when(key){
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
+                    "fillMaxHeight" -> partModifier = partModifier.fillMaxHeight()
                     "background" -> partModifier = partModifier.background(value.toString().color)
                 }
+            }
+
+            val contentAlignment: Alignment = when(box.contentAlignment){
+                "CENTER" -> Alignment.Center
+                "TOP_START" -> Alignment.TopStart
+                "BOTTOM_START" -> Alignment.BottomStart
+                "BOTTOM_END" -> Alignment.BottomEnd
+                else -> Alignment.TopStart
             }
 
             //partModifier = content(partModifier,box.props)
 
             Box(
-                modifier = partModifier
+                modifier = partModifier, contentAlignment = contentAlignment
             ) {
                 items?.let {
                     for (item in items) {
