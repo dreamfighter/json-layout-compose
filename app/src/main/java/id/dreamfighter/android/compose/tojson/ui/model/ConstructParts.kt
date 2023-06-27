@@ -49,6 +49,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import coil.compose.rememberAsyncImagePainter
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.load.model.GlideUrl
@@ -62,6 +63,7 @@ import id.dreamfighter.android.compose.tojson.ui.model.utils.color
 import id.dreamfighter.android.compose.tojson.ui.model.utils.createModifier
 import id.dreamfighter.android.compose.tojson.ui.theme.DefaultFont
 import kotlinx.coroutines.delay
+import java.io.File
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class)
 @Composable
@@ -379,7 +381,7 @@ fun ConstructPart(
                 else -> Alignment.Center
             }
             var partModifier = modifier
-            val image: Painter = painterResource(id = R.drawable.temp_masjid_img)
+            var image: Painter = painterResource(id = R.drawable.temp_masjid_img)
 
             if(imagePart.props["contentScale"] == "FillWidth"){
 
@@ -397,14 +399,19 @@ fun ConstructPart(
                 if(animateData["hidden"]!=null) {
                     hidden = animateData["hidden"] as Boolean
                 }
+                if(animateData["image"]!=null && animateData["image"] is Painter){
+                    image = animateData["image"] as Painter
+                }else if(animateData["url"]!=null && animateData["url"] is String){
+                    image = rememberAsyncImagePainter(model = File(animateData["url"].toString()))
+                }
             }
 
             if(!hidden) {
-                if (imagePart.glideUrl != null || data[imagePart.name] != null) {
+                if (imagePart.glideUrl != null && data[imagePart.name] != null) {
                     val builder = LazyHeaders.Builder()
 
                     val values = data[imagePart.name] as Map<String, Any?>
-                    val url = imagePart.glideUrl ?: values["url"].toString()
+                    val url = imagePart.glideUrl
                     if (values["headers"] != null) {
                         val headers = values["headers"] as Map<String, String>
                         headers.forEach { (key, value) ->
@@ -423,6 +430,7 @@ fun ConstructPart(
                         contentDescription = "", contentScale = contentScale
                     )
                 } else {
+
                     Image(image, "", modifier = partModifier, contentScale = contentScale)
                 }
             }
