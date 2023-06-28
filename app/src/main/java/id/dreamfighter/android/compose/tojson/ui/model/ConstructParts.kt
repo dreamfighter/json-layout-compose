@@ -49,7 +49,11 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import coil.ImageLoader
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import coil.util.CoilUtils
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.load.model.GlideUrl
@@ -63,6 +67,8 @@ import id.dreamfighter.android.compose.tojson.ui.model.utils.color
 import id.dreamfighter.android.compose.tojson.ui.model.utils.createModifier
 import id.dreamfighter.android.compose.tojson.ui.theme.DefaultFont
 import kotlinx.coroutines.delay
+import okhttp3.Headers
+import okhttp3.OkHttpClient
 import java.io.File
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class)
@@ -375,6 +381,8 @@ fun ConstructPart(
         Type.GLIDE_IMAGE -> {
             var contentScale = ContentScale.Fit
             val imagePart = listItems as GlideImagePart
+            var imageUrl by remember { mutableStateOf("") }
+            var headersHttp = Headers.Builder()
             val imageAlign = when (imagePart.imageAlign) {
                 Align.START -> Alignment.TopStart
                 Align.END -> Alignment.BottomEnd
@@ -396,6 +404,15 @@ fun ConstructPart(
             var hidden = false
             if(data[imagePart.name]!=null){
                 val animateData = data[imagePart.name] as Map<*, *>
+                imageUrl = animateData["url"].toString()
+                if (animateData["headers"] != null) {
+                    val headers = animateData["headers"] as Map<String, String>
+                    //token = headers["Authorization"] as String
+                    headers.forEach { (key, value) ->
+                        headersHttp.add(key,value)
+                        Log.d("Header","$key:$value")
+                    }
+                }
                 if(animateData["hidden"]!=null) {
                     hidden = animateData["hidden"] as Boolean
                 }
@@ -431,7 +448,21 @@ fun ConstructPart(
                     )
                 } else {
 
-                    Image(image, "", modifier = partModifier, contentScale = contentScale)
+                    val context = LocalContext.current
+                    Image(
+                        rememberAsyncImagePainter(
+                            remember(imageUrl) {
+                                ImageRequest.Builder(context)
+                                    .data(imageUrl)
+                                    .headers(headersHttp.build())
+                                    .diskCacheKey(imageUrl)
+                                    .memoryCacheKey(imageUrl)
+                                    .build()
+                            }
+                        ),
+                        null,modifier = partModifier, contentScale = contentScale
+                    )
+                    //Image(image, "", modifier = partModifier, contentScale = contentScale)
                 }
             }
             //Image(image , "", modifier = partModifier, contentScale = contentScale)
