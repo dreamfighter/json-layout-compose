@@ -381,7 +381,7 @@ fun ConstructPart(
         Type.GLIDE_IMAGE -> {
             var contentScale = ContentScale.Fit
             val imagePart = listItems as GlideImagePart
-            var imageUrl by remember { mutableStateOf("") }
+            var imageUrl = ""
             var headersHttp = Headers.Builder()
             val imageAlign = when (imagePart.imageAlign) {
                 Align.START -> Alignment.TopStart
@@ -399,7 +399,7 @@ fun ConstructPart(
                 partModifier = partModifier.fillMaxWidth()
             }
 
-            //Log.d("GLIDE_IMAGE","GLIDE_IMAGE  "+imagePart.name)
+            Log.d("GLIDE_IMAGE","GLIDE_IMAGE $imagePart.name => ${data[imagePart.name]}")
 
             var hidden = false
             if(data[imagePart.name]!=null ){
