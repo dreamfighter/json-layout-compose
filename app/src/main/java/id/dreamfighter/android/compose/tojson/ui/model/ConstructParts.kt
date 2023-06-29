@@ -402,9 +402,10 @@ fun ConstructPart(
             //Log.d("GLIDE_IMAGE","GLIDE_IMAGE  "+imagePart.name)
 
             var hidden = false
-            if(data[imagePart.name]!=null){
+            if(data[imagePart.name]!=null ){
                 val animateData = data[imagePart.name] as Map<*, *>
                 imageUrl = animateData["url"].toString()
+                Log.d("ImageRequest1",imageUrl)
                 if (animateData["headers"] != null) {
                     val headers = animateData["headers"] as Map<String, String>
                     //token = headers["Authorization"] as String
@@ -449,16 +450,15 @@ fun ConstructPart(
                 } else {
 
                     val context = LocalContext.current
+                    Log.d("ImageRequest",imageUrl)
                     Image(
                         rememberAsyncImagePainter(
-                            remember(imageUrl) {
-                                ImageRequest.Builder(context)
-                                    .data(imageUrl)
-                                    .headers(headersHttp.build())
-                                    .diskCacheKey(imageUrl)
-                                    .memoryCacheKey(imageUrl)
-                                    .build()
-                            }
+                            ImageRequest.Builder(context)
+                                .data(imageUrl)
+                                .headers(headersHttp.build())
+                                .diskCacheKey(imageUrl)
+                                .memoryCacheKey(imageUrl)
+                                .build()
                         ),
                         null,modifier = partModifier, contentScale = contentScale
                     )
