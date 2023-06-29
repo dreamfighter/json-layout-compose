@@ -399,7 +399,7 @@ fun ConstructPart(
                 partModifier = partModifier.fillMaxWidth()
             }
 
-            Log.d("GLIDE_IMAGE","GLIDE_IMAGE $imagePart.name => ${data[imagePart.name]}")
+            Log.d("GLIDE_IMAGE","GLIDE_IMAGE ${imagePart.name} => ${data[imagePart.name]}")
 
             var hidden = false
             if(data[imagePart.name]!=null ){
