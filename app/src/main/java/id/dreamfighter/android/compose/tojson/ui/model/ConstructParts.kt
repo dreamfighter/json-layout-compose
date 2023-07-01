@@ -381,7 +381,7 @@ fun ConstructPart(
         Type.GLIDE_IMAGE -> {
             var contentScale = ContentScale.Fit
             val imagePart = listItems as GlideImagePart
-            var imageUrl = ""
+            var imageUrl by remember {mutableStateOf("")}
             var headersHttp = Headers.Builder()
             val imageAlign = when (imagePart.imageAlign) {
                 Align.START -> Alignment.TopStart
@@ -403,9 +403,10 @@ fun ConstructPart(
 
             var hidden = false
             if(data[imagePart.name]!=null ){
-                val animateData = data[imagePart.name] as Map<*, *>
+                val animateData = data[imagePart.name] as SnapshotStateMap<*, *>
                 imageUrl = animateData["url"].toString()
                 Log.d("ImageRequest1",imageUrl)
+                Log.d("headers","${animateData["headers"]}")
                 if (animateData["headers"] != null) {
                     val headers = animateData["headers"] as Map<String, String>
                     //token = headers["Authorization"] as String
@@ -416,11 +417,6 @@ fun ConstructPart(
                 }
                 if(animateData["hidden"]!=null) {
                     hidden = animateData["hidden"] as Boolean
-                }
-                if(animateData["image"]!=null && animateData["image"] is Painter){
-                    image = animateData["image"] as Painter
-                }else if(animateData["url"]!=null && animateData["url"] is String){
-                    image = rememberAsyncImagePainter(model = File(animateData["url"].toString()))
                 }
             }
 
