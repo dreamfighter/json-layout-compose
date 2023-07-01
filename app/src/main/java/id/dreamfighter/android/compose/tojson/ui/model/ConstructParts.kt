@@ -399,20 +399,15 @@ fun ConstructPart(
                 partModifier = partModifier.fillMaxWidth()
             }
 
-            Log.d("GLIDE_IMAGE","GLIDE_IMAGE ${imagePart.name} => ${data[imagePart.name]}")
-
             var hidden = false
             if(data[imagePart.name]!=null ){
                 val animateData = data[imagePart.name] as SnapshotStateMap<*, *>
                 imageUrl = animateData["url"].toString()
-                Log.d("ImageRequest1",imageUrl)
-                Log.d("headers","${animateData["headers"]}")
                 if (animateData["headers"] != null) {
                     val headers = animateData["headers"] as Map<String, String>
                     //token = headers["Authorization"] as String
                     headers.forEach { (key, value) ->
                         headersHttp.add(key,value)
-                        Log.d("Header","$key:$value")
                     }
                 }
                 if(animateData["hidden"]!=null) {
@@ -446,7 +441,6 @@ fun ConstructPart(
                 } else {
 
                     val context = LocalContext.current
-                    Log.d("ImageRequest",imageUrl)
                     Image(
                         rememberAsyncImagePainter(
                             ImageRequest.Builder(context)
