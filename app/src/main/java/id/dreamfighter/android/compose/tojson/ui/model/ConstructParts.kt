@@ -85,15 +85,31 @@ fun ConstructPart(
             var partModifier = modifier
             var fontfamily = DefaultFont
             //Log.d("TEXT","${textPart.name}=>${data[textPart.name]}")
+
+            var fontWeight = when(textPart.fontWeight){
+                "BOLD" -> FontWeight.Bold
+                "THIN" -> FontWeight.Thin
+                "LIGHT" -> FontWeight.Light
+                else -> FontWeight.Normal
+            }
+            if(data["fonts"]!=null && textPart.fontFamily!=null){
+                val fontFamilies = data["fonts"] as Map<*,*>
+                fontfamily = fontFamilies[textPart.fontFamily] as
+                        FontListFontFamily
+            }
             val text = if(data[textPart.name]!=null){
                 val datas = data[textPart.name] as Map<*,*>
-                if(datas["fonts"]!=null && textPart.fontFamily!=null){
-                    val fontFamilies = datas["fonts"] as Map<*,*>
-                    fontfamily = fontFamilies[textPart.fontFamily] as
-                            FontListFontFamily
-                }else if(datas["fontFamily"]!=null){
+                if(datas["fontFamily"]!=null){
                     fontfamily = datas["fontFamily"] as
                             FontListFontFamily
+                }
+                if(datas["fontWeight"]!=null){
+                    fontWeight = when(datas["fontWeight"]){
+                        "BOLD" -> FontWeight.Bold
+                        "THIN" -> FontWeight.Thin
+                        "LIGHT" -> FontWeight.Light
+                        else -> FontWeight.Normal
+                    }
                 }
                 datas["text"] as String
             }else{
@@ -118,13 +134,6 @@ fun ConstructPart(
 
             if(textPart.color!=null){
                 color = textPart.color.color
-            }
-
-            var fontWeight = when(textPart.fontWeight){
-                "BOLD" -> FontWeight.Bold
-                "THIN" -> FontWeight.Thin
-                "LIGHT" -> FontWeight.Light
-                else -> FontWeight.Normal
             }
 
             textPart.props.forEach { (key, value) ->
