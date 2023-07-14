@@ -129,7 +129,7 @@ fun Greeting(payload: Payload) {
     data["backgroundImg1"] = mutableStateMapOf(
         "url" to "https://masjid-tv.dreamfighter.id/media/image/video:313608",
         "hidden" to false,
-        "headers" to mutableMapOf<String,String>("Authorization" to "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1MWJiNGJkMWQwYzYxNDc2ZWIxYjcwYzNhNDdjMzE2ZDVmODkzMmIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiRml0cmEgQmF5dSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS0vQU9oMTRHZ3B5X2FUUVdpRHBxcGtqWGJHVnhJUDFFSG8yeEhsNlZlRnZ4SWJZdz1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9kcmVhbWZpZ2h0ZXItaWQiLCJhdWQiOiJkcmVhbWZpZ2h0ZXItaWQiLCJhdXRoX3RpbWUiOjE2ODgyMjQ3MjEsInVzZXJfaWQiOiJjNXJzbVVoOEJGUVlGOW56U1hhV21odWdGTTMzIiwic3ViIjoiYzVyc21VaDhCRlFZRjluelNYYVdtaHVnRk0zMyIsImlhdCI6MTY4OTM0ODkxNywiZXhwIjoxNjg5MzUyNTE3LCJlbWFpbCI6ImJheXUuemVnZXJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDEyMzc1MzY0MzkzNzg0MTIzNDkiXSwiZW1haWwiOlsiYmF5dS56ZWdlckBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJnb29nbGUuY29tIn19.AIPjAlgqzpMUUBbuIlldb51rYPoTWmaKLNltVtvadNsQu-f7AcIY46oae2oJ817cOJQ9aExYC3R1W5QwJVOLwcJJNLvTQWR9AaqWf2_Hhwq9yQlf-JRIA4yRfCvXJJ3b_MCk3IiF9fsx5WXrtuHCegO9waWds4C8g4umAJ7YiJXUmOyhdp4RhhzUiS5Q5RB0nt-SrIz8BhfLfrmYVvcSpSCfrgL6pp4WqcgNXdg82UJcuYMl_u0GRza8wgxCVHqCo84FvWF1P5jk4sfRVcpKfACaPNeO81Am1YIQ8Fn-nNsSTEEn75EEYU20RZuxpSMQTuN3Gth1AufUrp7WeY-dEg"))
+        "headers" to mutableMapOf<String,String>("Authorization" to "Eg"))
     data["fonts"] = mutableMapOf("CustomFont" to CustomFont)
 
     for(item in dynamicListItem) {
