@@ -45,6 +45,7 @@ import androidx.media3.common.Player
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -354,6 +355,7 @@ fun ConstructPart(
                 Align.END -> Alignment.BottomEnd
                 else -> Alignment.Center
             }
+            var httpHeaders = mapOf<String,String>()
             var partModifier = modifier
             val image: Painter = painterResource(id = R.drawable.temp_masjid_img)
 
@@ -366,6 +368,8 @@ fun ConstructPart(
             }
             val uri = if(data[videoPart.name]!=null){
                 val map = data[videoPart.name] as Map<*, *>
+                httpHeaders = map["headers"] as Map<String, String>
+
                 "${map["url"]}"
             }else{
                 videoPart.url
@@ -381,7 +385,7 @@ fun ConstructPart(
             }
 
             if(!hidden && uri!=null) {
-                VideoPlayer(uri = Uri.parse(uri))
+                VideoPlayer(Uri.parse(uri),httpHeaders)
             }
 
             //Image(image , "", modifier = partModifier, contentScale = contentScale)
@@ -446,7 +450,9 @@ fun ConstructPart(
                         model = glideUrl,
                         modifier = partModifier,
                         contentDescription = "", contentScale = contentScale
-                    )
+                    ) {
+                        it.timeout(60000)
+                    }
                 } else {
 
                     val context = LocalContext.current
@@ -626,7 +632,7 @@ fun ConstructPart(
 
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun VideoPlayer(uri: Uri) {
+fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
     val context = LocalContext.current
 
     val exoPlayer = remember {
@@ -635,6 +641,7 @@ fun VideoPlayer(uri: Uri) {
             .apply {
                 val defaultDataSourceFactory = DefaultHttpDataSource.Factory()
                 //val defaultDataSourceFactory = DefaultDataSource.Factory(context)
+                defaultDataSourceFactory.setDefaultRequestProperties(headers)
 
                 val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(
                     context,

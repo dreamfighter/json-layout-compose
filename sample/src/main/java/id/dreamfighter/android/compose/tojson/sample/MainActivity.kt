@@ -117,7 +117,7 @@ fun Greeting(payload: Payload) {
     val dynamicListItem = payload.listItems
     val modifier = Modifier
     val texts = mapOf<String,Any>("text" to "Ashr", "fontFamily" to CustomFont.getCustomFont())
-    val data:SnapshotStateMap<String,Any?> = mutableStateMapOf("ashr" to texts)
+    val data:SnapshotStateMap<String,Any?> = mutableStateMapOf("ashar" to texts)
     //val data: MutableState<Map<String, Any?>> = mutableStateOf(mutableMapOf("ashr" to "Ashr"))
 
 
@@ -125,7 +125,12 @@ fun Greeting(payload: Payload) {
         "https://img.freepik.com/premium-psd/3d-rendering-ramadan-kareem-with-crescent-moon-star_8306-952.jpg?w=1380")
     var i = 0
 
-    data["backgroundImg1"] = mutableStateMapOf("hidden" to true)
+    data["backgroundImg"] = mutableStateMapOf("hidden" to true)
+    data["backgroundImg1"] = mutableStateMapOf(
+        "url" to "https://masjid-tv.dreamfighter.id/media/image/video:313608",
+        "hidden" to false,
+        "headers" to mutableMapOf<String,String>("Authorization" to "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1MWJiNGJkMWQwYzYxNDc2ZWIxYjcwYzNhNDdjMzE2ZDVmODkzMmIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiRml0cmEgQmF5dSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS0vQU9oMTRHZ3B5X2FUUVdpRHBxcGtqWGJHVnhJUDFFSG8yeEhsNlZlRnZ4SWJZdz1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9kcmVhbWZpZ2h0ZXItaWQiLCJhdWQiOiJkcmVhbWZpZ2h0ZXItaWQiLCJhdXRoX3RpbWUiOjE2ODgyMjQ3MjEsInVzZXJfaWQiOiJjNXJzbVVoOEJGUVlGOW56U1hhV21odWdGTTMzIiwic3ViIjoiYzVyc21VaDhCRlFZRjluelNYYVdtaHVnRk0zMyIsImlhdCI6MTY4OTM0ODkxNywiZXhwIjoxNjg5MzUyNTE3LCJlbWFpbCI6ImJheXUuemVnZXJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDEyMzc1MzY0MzkzNzg0MTIzNDkiXSwiZW1haWwiOlsiYmF5dS56ZWdlckBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJnb29nbGUuY29tIn19.AIPjAlgqzpMUUBbuIlldb51rYPoTWmaKLNltVtvadNsQu-f7AcIY46oae2oJ817cOJQ9aExYC3R1W5QwJVOLwcJJNLvTQWR9AaqWf2_Hhwq9yQlf-JRIA4yRfCvXJJ3b_MCk3IiF9fsx5WXrtuHCegO9waWds4C8g4umAJ7YiJXUmOyhdp4RhhzUiS5Q5RB0nt-SrIz8BhfLfrmYVvcSpSCfrgL6pp4WqcgNXdg82UJcuYMl_u0GRza8wgxCVHqCo84FvWF1P5jk4sfRVcpKfACaPNeO81Am1YIQ8Fn-nNsSTEEn75EEYU20RZuxpSMQTuN3Gth1AufUrp7WeY-dEg"))
+    data["fonts"] = mutableMapOf("CustomFont" to CustomFont)
 
     for(item in dynamicListItem) {
         ConstructPart(
@@ -185,7 +190,6 @@ val payloadMajidTv1 = """
     {
       "type": "VIDEO",
       "name": "backgroundImg1",
-      "url": "https://file-examples.com/storage/fe21053bab6446bba9a0947/2017/04/file_example_MP4_640_3MG.mp4",
       "props": {
         "contentScale": "FillWidth",
         "fillMaxWidth": true
@@ -216,6 +220,7 @@ val payloadMajidTv1 = """
                   "name": "date",
                   "message": "Sabtu, 11 Mar 2023\n19 Sha'ban 1444",
                   "textAlign": "START",
+                  "fontFamily":"CustomFont",
                   "color": "#FFFFFFFF",
                   "textFont": 20,
                   "props": {
@@ -229,6 +234,7 @@ val payloadMajidTv1 = """
                   "name": "masjidName",
                   "message": "Masjid AT-Taqwa Pesona Ciganitri",
                   "textAlign": "CENTER",
+                  "fontFamily":"CustomFont",
                   "color": "#FFFFFFFF",
                   "textFont": 30,
                   "props": {
@@ -243,6 +249,7 @@ val payloadMajidTv1 = """
                   "type": "TEXT",
                   "name": "currentTime",
                   "message": "11:50:00",
+                  "fontFamily":"CustomFont",
                   "textAlign": "CENTER",
                   "color": "#FFFFFFFF",
                   "textFont": 50,
@@ -278,6 +285,7 @@ val payloadMajidTv1 = """
               "maxLines": 1,
               "color": "#FFFFFFFF",
               "fontWeight": "BOLD",
+              "fontFamily":"CustomFont",
               "textFont": 25,
               "props": {
                 "clip": {
@@ -305,6 +313,7 @@ val payloadMajidTv1 = """
           "maxLines": 1,
           "alignment": "CENTER",
           "color": "#FF000000",
+          "fontFamily":"CustomFont",
           "fontWeight": "BOLD",
           "textFont": 20,
           "props": {
@@ -346,6 +355,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "subuh",
                           "message": "Fajr",
+                          "fontFamily":"CustomFont",
                           "color": "#FFFFFFFF",
                           "textFont": 20
                         },
@@ -353,6 +363,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "subuhTime",
                           "message": "04:30",
+                          "fontFamily":"CustomFont",
                           "textFont": 30,
                           "props": {
                             "background": "#FFFFFFFF",
@@ -381,6 +392,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "terbit",
                           "message": "Fajr",
+                          "fontFamily":"CustomFont",
                           "color": "#FFFFFFFF",
                           "textFont": 20
                         },
@@ -388,6 +400,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "terbitTime",
                           "message": "04:30",
+                          "fontFamily":"CustomFont",
                           "textFont": 30,
                           "props": {
                             "background": "#FFFFFFFF",
@@ -416,6 +429,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "dhuha",
                           "message": "Fajr",
+                          "fontFamily":"CustomFont",
                           "color": "#FFFFFFFF",
                           "textFont": 20
                         },
@@ -423,6 +437,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "dhuhaTime",
                           "message": "04:30",
+                          "fontFamily":"CustomFont",
                           "textFont": 30,
                           "props": {
                             "background": "#FFFFFFFF",
@@ -451,6 +466,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "dzuhur",
                           "message": "Fajr",
+                          "fontFamily":"CustomFont",
                           "color": "#FFFFFFFF",
                           "textFont": 20
                         },
@@ -458,6 +474,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "dzuhurTime",
                           "message": "04:30",
+                          "fontFamily":"CustomFont",
                           "textFont": 30,
                           "props": {
                             "background": "#FFFFFFFF",
@@ -486,6 +503,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "ashar",
                           "message": "Fajr",
+                          "fontFamily":"CustomFont",
                           "color": "#FFFFFFFF",
                           "textFont": 20
                         },
@@ -493,6 +511,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "asharTime",
                           "message": "04:30",
+                          "fontFamily":"CustomFont",
                           "textFont": 30,
                           "props": {
                             "background": "#FFFFFFFF",
@@ -521,6 +540,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "maghrib",
                           "message": "Fajr",
+                          "fontFamily":"CustomFont",
                           "color": "#FFFFFFFF",
                           "textFont": 20
                         },
@@ -528,6 +548,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "maghribTime",
                           "message": "04:30",
+                          "fontFamily":"CustomFont",
                           "textFont": 30,
                           "props": {
                             "background": "#FFFFFFFF",
@@ -556,6 +577,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "isya",
                           "message": "Fajr",
+                          "fontFamily":"CustomFont",
                           "color": "#FFFFFFFF",
                           "textFont": 20
                         },
@@ -563,6 +585,7 @@ val payloadMajidTv1 = """
                           "type": "TEXT",
                           "name": "isyaTime",
                           "message": "04:30",
+                          "fontFamily":"CustomFont",
                           "textFont": 30,
                           "props": {
                             "background": "#FFFFFFFF",
@@ -603,6 +626,7 @@ val payloadMajidTv1 = """
               "message":"this is info",
               "textFont": 30,
               "color": "#FFFFFF",
+              "fontFamily":"CustomFont",
               "textAlign":"CENTER",
               "props": {
                 "padding":{"bottom":8},
@@ -648,7 +672,7 @@ val payloadMajidTv1 = """
             {
               "type": "TEXT",
               "name": "infoRight",
-              "message":"this is info",
+              "message":"this is info ${1 + 1}",
               "textFont": 25,
               "color": "#FFFFFF",
               "textAlign":"END",
