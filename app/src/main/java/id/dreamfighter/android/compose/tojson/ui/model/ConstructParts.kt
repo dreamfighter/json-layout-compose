@@ -15,7 +15,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Card
@@ -26,13 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontListFontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,19 +38,20 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
-import androidx.media3.datasource.HttpDataSource
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.NoOpCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
-import coil.ImageLoader
-import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import coil.util.CoilUtils
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.load.model.GlideUrl
@@ -69,7 +66,6 @@ import id.dreamfighter.android.compose.tojson.ui.model.utils.createModifier
 import id.dreamfighter.android.compose.tojson.ui.theme.DefaultFont
 import kotlinx.coroutines.delay
 import okhttp3.Headers
-import okhttp3.OkHttpClient
 import java.io.File
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class)
@@ -639,19 +635,47 @@ fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
         ExoPlayer.Builder(context)
             .build()
             .apply {
-                val defaultDataSourceFactory = DefaultHttpDataSource.Factory()
-                //val defaultDataSourceFactory = DefaultDataSource.Factory(context)
-                defaultDataSourceFactory.setDefaultRequestProperties(headers)
+                val databaseProvider = StandaloneDatabaseProvider(context)
+                val cacheDir = context.externalCacheDir
+                //Log.d("CACHE_DIR","${cacheDir?.exists()} ${cacheDir?.absolutePath}")
+                if(cacheDir?.exists() != true){
+                    cacheDir?.mkdirs()
+                }
+                cacheDir?.let {
+                    //Log.d("CACHE_DIR","${it.absolutePath}")
+                    val simpleCache = SimpleCache(
+                        it,
+                        NoOpCacheEvictor(),
+                        databaseProvider
+                    )
 
-                val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(
-                    context,
-                    defaultDataSourceFactory
-                )
-                val source = ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(uri))
+                    val defaultDataSourceFactory = DefaultHttpDataSource.Factory()
+                    //val defaultDataSourceFactory = DefaultDataSource.Factory(context)
+                    defaultDataSourceFactory.setDefaultRequestProperties(headers)
 
-                setMediaSource(source)
-                prepare()
+                    /*
+                    val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(
+                        context,
+                        defaultDataSourceFactory
+                    )
+
+                     */
+
+                   // val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+
+                    val cacheDataSourceFactory = CacheDataSource.Factory()
+                        .setCache(simpleCache)
+                        .setUpstreamDataSourceFactory(defaultDataSourceFactory)
+                        .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+
+                    val source = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                        .createMediaSource(MediaItem.fromUri(uri))
+
+                    //val source = DefaultMediaSourceFactory(cacheDataSourceFactory).createMediaSource(MediaItem.fromUri(uri))
+
+                    setMediaSource(source)
+                    prepare()
+                }
             }
     }
 
