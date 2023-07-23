@@ -364,8 +364,9 @@ fun ConstructPart(
             }
             val uri = if(data[videoPart.name]!=null){
                 val map = data[videoPart.name] as Map<*, *>
-                httpHeaders = map["headers"] as Map<String, String>
-
+                if(map["headers"]!=null) {
+                    httpHeaders = map["headers"] as Map<String, String>
+                }
                 "${map["url"]}"
             }else{
                 videoPart.url
