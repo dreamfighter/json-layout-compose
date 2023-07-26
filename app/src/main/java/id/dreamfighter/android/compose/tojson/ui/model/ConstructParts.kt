@@ -453,6 +453,7 @@ fun ConstructPart(
                 } else {
 
                     val context = LocalContext.current
+                    Log.d("GLIDE_URL",imageUrl)
                     Image(
                         rememberAsyncImagePainter(
                             ImageRequest.Builder(context)
@@ -637,12 +638,12 @@ fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
             .build()
             .apply {
                 val databaseProvider = StandaloneDatabaseProvider(context)
-                val cacheDir = context.externalCacheDir
+                val cacheDir = File(context.externalCacheDir,uri.lastPathSegment)
                 //Log.d("CACHE_DIR","${cacheDir?.exists()} ${cacheDir?.absolutePath}")
-                if(cacheDir?.exists() != true){
-                    cacheDir?.mkdirs()
+                if(!cacheDir.exists()){
+                    cacheDir.mkdirs()
                 }
-                cacheDir?.let {
+                cacheDir.let {
                     //Log.d("CACHE_DIR","${it.absolutePath}")
                     val simpleCache = SimpleCache(
                         it,
@@ -655,14 +656,14 @@ fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
                     defaultDataSourceFactory.setDefaultRequestProperties(headers)
 
                     /*
-                    val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(
-                        context,
-                        defaultDataSourceFactory
-                    )
+                                val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(
+                                    context,
+                                    defaultDataSourceFactory
+                                )
 
-                     */
+                                 */
 
-                   // val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    // val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
 
                     val cacheDataSourceFactory = CacheDataSource.Factory()
                         .setCache(simpleCache)
