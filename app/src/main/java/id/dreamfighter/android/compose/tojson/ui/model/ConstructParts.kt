@@ -408,7 +408,7 @@ fun ConstructPart(
                 }
             }
 
-            if(!hidden && uri!=null) {
+            if(!hidden && !uri.isNullOrBlank()) {
                 VideoPlayer(Uri.parse(uri),httpHeaders)
             }
 
