@@ -1,5 +1,6 @@
 package id.dreamfighter.android.compose.tojson.ui.model
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.view.ViewGroup
@@ -67,6 +68,32 @@ import id.dreamfighter.android.compose.tojson.ui.theme.DefaultFont
 import kotlinx.coroutines.delay
 import okhttp3.Headers
 import java.io.File
+
+class SimpleCacheBuilder private constructor() {
+    companion object {
+
+        @Volatile
+        private var instance: SimpleCache? = null
+
+        @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+        fun build(context:Context) =
+            instance ?: synchronized(this) {
+                val databaseProvider = StandaloneDatabaseProvider(context)
+                val cacheDir = context.externalCacheDir
+                Log.d("CACHE_DIR","${cacheDir?.exists()} ${cacheDir?.absolutePath}")
+                //if(cacheDir?.exists() !){
+                    cacheDir?.mkdirs()
+                //}
+                //Log.d("CACHE_DIR","${it.absolutePath}")
+
+                instance ?: SimpleCache(
+                    cacheDir!!,
+                    NoOpCacheEvictor(),
+                    databaseProvider
+                ).also { instance = it }
+            }
+    }
+}
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class)
 @Composable
@@ -637,47 +664,35 @@ fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
         ExoPlayer.Builder(context)
             .build()
             .apply {
-                val databaseProvider = StandaloneDatabaseProvider(context)
-                val cacheDir = File(context.externalCacheDir,uri.encodedPath)
-                Log.d("CACHE_DIR","${cacheDir.exists()} ${cacheDir.absolutePath}")
-                if(!cacheDir.exists()){
-                    cacheDir.mkdirs()
-                }
-                cacheDir.let {
-                    //Log.d("CACHE_DIR","${it.absolutePath}")
-                    val simpleCache = SimpleCache(
-                        it,
-                        NoOpCacheEvictor(),
-                        databaseProvider
-                    )
 
-                    val defaultDataSourceFactory = DefaultHttpDataSource.Factory()
-                    //val defaultDataSourceFactory = DefaultDataSource.Factory(context)
-                    defaultDataSourceFactory.setDefaultRequestProperties(headers)
 
-                    /*
-                                val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(
-                                    context,
-                                    defaultDataSourceFactory
-                                )
+                val defaultDataSourceFactory = DefaultHttpDataSource.Factory()
+                //val defaultDataSourceFactory = DefaultDataSource.Factory(context)
+                defaultDataSourceFactory.setDefaultRequestProperties(headers)
 
-                                 */
+                /*
+                            val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(
+                                context,
+                                defaultDataSourceFactory
+                            )
 
-                    // val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                             */
 
-                    val cacheDataSourceFactory = CacheDataSource.Factory()
-                        .setCache(simpleCache)
-                        .setUpstreamDataSourceFactory(defaultDataSourceFactory)
-                        .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                // val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
 
-                    val source = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-                        .createMediaSource(MediaItem.fromUri(uri))
+                val cacheDataSourceFactory = CacheDataSource.Factory()
+                    .setCache(SimpleCacheBuilder.build(context))
+                    .setUpstreamDataSourceFactory(defaultDataSourceFactory)
+                    .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
-                    //val source = DefaultMediaSourceFactory(cacheDataSourceFactory).createMediaSource(MediaItem.fromUri(uri))
+                val source = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(uri))
 
-                    setMediaSource(source)
-                    prepare()
-                }
+                //val source = DefaultMediaSourceFactory(cacheDataSourceFactory).createMediaSource(MediaItem.fromUri(uri))
+
+                setMediaSource(source)
+                prepare()
+
             }
     }
 
