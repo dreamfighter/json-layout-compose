@@ -638,8 +638,8 @@ fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
             .build()
             .apply {
                 val databaseProvider = StandaloneDatabaseProvider(context)
-                val cacheDir = File(context.externalCacheDir,uri.lastPathSegment)
-                //Log.d("CACHE_DIR","${cacheDir?.exists()} ${cacheDir?.absolutePath}")
+                val cacheDir = File(context.externalCacheDir,uri.encodedPath)
+                Log.d("CACHE_DIR","${cacheDir.exists()} ${cacheDir.absolutePath}")
                 if(!cacheDir.exists()){
                     cacheDir.mkdirs()
                 }
