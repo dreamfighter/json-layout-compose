@@ -43,6 +43,7 @@ import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
@@ -82,7 +83,7 @@ class SimpleCacheBuilder private constructor() {
                 val cacheDir = context.externalCacheDir
                 Log.d("CACHE_DIR","${cacheDir?.exists()} ${cacheDir?.absolutePath}")
                 //if(cacheDir?.exists() !){
-                    cacheDir?.mkdirs()
+                //cacheDir?.mkdirs()
                 //}
                 //Log.d("CACHE_DIR","${it.absolutePath}")
 
@@ -409,7 +410,12 @@ fun ConstructPart(
             }
 
             if(!hidden && !uri.isNullOrBlank()) {
-                VideoPlayer(Uri.parse(uri),httpHeaders)
+                VideoPlayer(if(uri.startsWith("http")){
+                    Uri.parse(uri)
+                }else{
+                    Log.d("File","${File(uri).exists()}")
+                    Uri.fromFile(File(uri))
+                     },httpHeaders)
             }
 
             //Image(image , "", modifier = partModifier, contentScale = contentScale)
@@ -655,6 +661,8 @@ fun ConstructPart(
     }
 }
 
+
+
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
@@ -665,28 +673,23 @@ fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
             .build()
             .apply {
 
-
                 val defaultDataSourceFactory = DefaultHttpDataSource.Factory()
                 //val defaultDataSourceFactory = DefaultDataSource.Factory(context)
                 defaultDataSourceFactory.setDefaultRequestProperties(headers)
 
-                /*
-                            val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(
-                                context,
-                                defaultDataSourceFactory
-                            )
-
-                             */
-
                 // val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
 
-                val cacheDataSourceFactory = CacheDataSource.Factory()
-                    .setCache(SimpleCacheBuilder.build(context))
-                    .setUpstreamDataSourceFactory(defaultDataSourceFactory)
-                    .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                val source = if(uri.scheme?.startsWith("http")==true){
+                    val cacheDataSourceFactory = CacheDataSource.Factory()
 
-                val source = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(uri))
+                    cacheDataSourceFactory.setCache(SimpleCacheBuilder.build(context))
+                    cacheDataSourceFactory.setUpstreamDataSourceFactory(defaultDataSourceFactory)
+                    cacheDataSourceFactory.setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                    ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                        .createMediaSource(MediaItem.fromUri(uri))
+                }else{
+                    ProgressiveMediaSource.Factory(FileDataSource.Factory()).createMediaSource(MediaItem.fromUri(uri))
+                }
 
                 //val source = DefaultMediaSourceFactory(cacheDataSourceFactory).createMediaSource(MediaItem.fromUri(uri))
 
