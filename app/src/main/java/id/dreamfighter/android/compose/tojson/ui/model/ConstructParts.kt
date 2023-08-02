@@ -702,6 +702,11 @@ fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
     exoPlayer.playWhenReady = true
     exoPlayer.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
     exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+    if(headers["volume"] != null){
+        exoPlayer.volume = headers["volume"]?.toFloat() ?: 0f
+    }else {
+        exoPlayer.volume = 0f
+    }
 
     DisposableEffect(
         AndroidView(factory = {
