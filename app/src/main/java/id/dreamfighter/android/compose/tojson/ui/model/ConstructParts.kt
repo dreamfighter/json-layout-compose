@@ -413,7 +413,12 @@ fun ConstructPart(
             }
 
             if(!hidden && uris.isNotEmpty()) {
-                VideoPlayer(uris,httpHeaders)
+                VideoPlayer(uris,httpHeaders){
+                    val map = mapOf(
+                        "name" to videoPart.name,
+                        "state" to it)
+                    event(map)
+                }
             }
 
             //Image(image , "", modifier = partModifier, contentScale = contentScale)
@@ -663,7 +668,7 @@ fun ConstructPart(
 
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun VideoPlayer(uris: List<String>,headers:Map<String,String>) {
+fun VideoPlayer(uris: List<String>,headers:Map<String,String>,listener:(Int) -> Unit = {_ ->}) {
     val context = LocalContext.current
 
     val exoPlayer = remember {
@@ -714,6 +719,11 @@ fun VideoPlayer(uris: List<String>,headers:Map<String,String>) {
     }else {
         exoPlayer.volume = 0f
     }
+    exoPlayer.addListener(object: Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            listener(playbackState)
+        }
+    })
 
     DisposableEffect(
         AndroidView(factory = {
