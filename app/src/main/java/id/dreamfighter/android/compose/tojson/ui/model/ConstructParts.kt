@@ -372,8 +372,9 @@ fun ConstructPart(
         }
 
         Type.VIDEO -> {
-            var contentScale = ContentScale.Fit
             val videoPart = listItems as Video
+
+            var contentScale = ContentScale.Fit
             val imageAlign = when (videoPart.imageAlign) {
                 Align.START -> Alignment.TopStart
                 Align.END -> Alignment.BottomEnd
@@ -390,14 +391,16 @@ fun ConstructPart(
             if(videoPart.props["fillMaxWidth"] == true){
                 partModifier = partModifier.fillMaxWidth()
             }
-            val uri = if(data[videoPart.name]!=null){
+            val uris = if(data[videoPart.name]!=null){
                 val map = data[videoPart.name] as Map<*, *>
                 if(map["headers"]!=null) {
                     httpHeaders = map["headers"] as Map<String, String>
                 }
-                "${map["url"]}"
+                map["url"] as List<String>
+            }else if(videoPart.url!=null){
+                listOf<String>(videoPart.url!!)
             }else{
-                videoPart.url
+                listOf<String>()
             }
 
 
@@ -409,13 +412,8 @@ fun ConstructPart(
                 }
             }
 
-            if(!hidden && !uri.isNullOrBlank()) {
-                VideoPlayer(if(uri.startsWith("http")){
-                    Uri.parse(uri)
-                }else{
-                    Log.d("File","${File(uri).exists()}")
-                    Uri.fromFile(File(uri))
-                     },httpHeaders)
+            if(!hidden && uris.isNotEmpty()) {
+                VideoPlayer(uris,httpHeaders)
             }
 
             //Image(image , "", modifier = partModifier, contentScale = contentScale)
@@ -665,7 +663,7 @@ fun ConstructPart(
 
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
+fun VideoPlayer(uris: List<String>,headers:Map<String,String>) {
     val context = LocalContext.current
 
     val exoPlayer = remember {
@@ -679,21 +677,30 @@ fun VideoPlayer(uri: Uri,headers:Map<String,String>) {
 
                 // val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
 
-                val source = if(uri.scheme?.startsWith("http")==true){
-                    val cacheDataSourceFactory = CacheDataSource.Factory()
+                uris.forEach {
+                    val uri = if(it.startsWith("http")){
+                        Uri.parse(it)
+                    }else{
+                        Log.d("File","${File(it).exists()}")
+                        Uri.fromFile(File(it))
+                    }
+                    val source = if(uri.scheme?.startsWith("http")==true){
+                        val cacheDataSourceFactory = CacheDataSource.Factory()
 
-                    cacheDataSourceFactory.setCache(SimpleCacheBuilder.build(context))
-                    cacheDataSourceFactory.setUpstreamDataSourceFactory(defaultDataSourceFactory)
-                    cacheDataSourceFactory.setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-                    ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-                        .createMediaSource(MediaItem.fromUri(uri))
-                }else{
-                    ProgressiveMediaSource.Factory(FileDataSource.Factory()).createMediaSource(MediaItem.fromUri(uri))
+                        cacheDataSourceFactory.setCache(SimpleCacheBuilder.build(context))
+                        cacheDataSourceFactory.setUpstreamDataSourceFactory(defaultDataSourceFactory)
+                        cacheDataSourceFactory.setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                        ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(uri))
+                    }else{
+                        ProgressiveMediaSource.Factory(FileDataSource.Factory()).createMediaSource(MediaItem.fromUri(uri))
+                    }
+
+                    //val source = DefaultMediaSourceFactory(cacheDataSourceFactory).createMediaSource(MediaItem.fromUri(uri))
+
+                    addMediaSource(source)
                 }
 
-                //val source = DefaultMediaSourceFactory(cacheDataSourceFactory).createMediaSource(MediaItem.fromUri(uri))
-
-                setMediaSource(source)
                 prepare()
 
             }
