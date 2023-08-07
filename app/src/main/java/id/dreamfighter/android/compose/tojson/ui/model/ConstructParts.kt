@@ -2,6 +2,7 @@ package id.dreamfighter.android.compose.tojson.ui.model
 
 import android.content.Context
 import android.media.metrics.TrackChangeEvent
+import android.media.session.PlaybackState
 import android.net.Uri
 import android.util.Log
 import android.view.ViewGroup
@@ -422,6 +423,7 @@ fun ConstructPart(
                     val map = mapOf(
                         "name" to videoPart.name,
                         "state" to it)
+                    Log.d("event","$it")
                     event(map)
                 }
             }
@@ -681,11 +683,11 @@ fun VideoPlayer(uris: List<String>,headers:Map<String,String>,listener:(Int) -> 
             .build()
             .apply {
 
-    val defaultDataSourceFactory = DefaultHttpDataSource.Factory()
-    //val defaultDataSourceFactory = DefaultDataSource.Factory(context)
-    defaultDataSourceFactory.setDefaultRequestProperties(headers)
+                val defaultDataSourceFactory = DefaultHttpDataSource.Factory()
+                //val defaultDataSourceFactory = DefaultDataSource.Factory(context)
+                defaultDataSourceFactory.setDefaultRequestProperties(headers)
 
-    // val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                // val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
 
                 uris.forEach {
                     val uri = if(it.startsWith("http")){
@@ -697,22 +699,18 @@ fun VideoPlayer(uris: List<String>,headers:Map<String,String>,listener:(Int) -> 
                     val source = if(uri.scheme?.startsWith("http")==true){
                         val cacheDataSourceFactory = CacheDataSource.Factory()
 
-            cacheDataSourceFactory.setCache(SimpleCacheBuilder.build(context))
-            cacheDataSourceFactory.setUpstreamDataSourceFactory(defaultDataSourceFactory)
-            cacheDataSourceFactory.setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-            ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(uri))
-        }else{
-            ProgressiveMediaSource.Factory(FileDataSource.Factory()).createMediaSource(MediaItem.fromUri(uri))
-        }
-
+                        cacheDataSourceFactory.setCache(SimpleCacheBuilder.build(context))
+                        cacheDataSourceFactory.setUpstreamDataSourceFactory(defaultDataSourceFactory)
+                        cacheDataSourceFactory.setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                        ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(uri))
+                    }else{
+                        ProgressiveMediaSource.Factory(FileDataSource.Factory()).createMediaSource(MediaItem.fromUri(uri))
+                    }
                     //val source = DefaultMediaSourceFactory(cacheDataSourceFactory).createMediaSource(MediaItem.fromUri(uri))
-
                     addMediaSource(source)
                 }
-
                 prepare()
-
             }
     }
 
@@ -724,24 +722,6 @@ fun VideoPlayer(uris: List<String>,headers:Map<String,String>,listener:(Int) -> 
     }else {
         exoPlayer.volume = 0f
     }
-    exoPlayer.addListener(object: Player.Listener {
-
-        override fun onTracksInfoChanged(tracksInfo: TracksInfo) {
-            Log.d("tracksInfo","${tracksInfo.trackGroupInfos[1].trackGroup}")
-        }
-
-        override fun onPlaylistMetadataChanged(mediaMetadata: MediaMetadata) {
-            Log.d("mediaMetadata","${mediaMetadata.mediaUri}")
-        }
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            //listener(playbackState)
-            Log.d("MediaItem","${mediaItem?.localConfiguration?.uri}")
-        }
-        override fun onPlaybackStateChanged(playbackState: Int) {
-            Log.d("playbackState","$playbackState")
-            listener(playbackState)
-        }
-    })
 
     DisposableEffect(
         AndroidView(factory = {
@@ -755,6 +735,28 @@ fun VideoPlayer(uris: List<String>,headers:Map<String,String>,listener:(Int) -> 
             }
         })
     ) {
-        onDispose { exoPlayer.release() }
+        val listener = object: Player.Listener {
+
+            override fun onTracksInfoChanged(tracksInfo: TracksInfo) {
+                Log.d("tracksInfo","${tracksInfo.trackGroupInfos[1].trackGroup}")
+            }
+
+            override fun onPlaylistMetadataChanged(mediaMetadata: MediaMetadata) {
+                Log.d("mediaMetadata","${mediaMetadata.mediaUri}")
+            }
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                //listener(playbackState)
+                Log.d("MediaItem","${mediaItem?.localConfiguration?.uri}")
+            }
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                Log.d("playbackState","$playbackState")
+                listener(playbackState)
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
     }
 }
