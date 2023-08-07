@@ -1,8 +1,6 @@
 package id.dreamfighter.android.compose.tojson.ui.model
 
 import android.content.Context
-import android.media.metrics.TrackChangeEvent
-import android.media.session.PlaybackState
 import android.net.Uri
 import android.util.Log
 import android.view.ViewGroup
@@ -41,20 +39,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import androidx.media3.common.Metadata
 import androidx.media3.common.Player
-import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.TracksInfo
 import androidx.media3.database.StandaloneDatabaseProvider
-import androidx.media3.datasource.DataSource
-import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -419,11 +412,12 @@ fun ConstructPart(
             }
 
             if(!hidden && uris.isNotEmpty()) {
-                VideoPlayer(uris,httpHeaders){
+                VideoPlayer(uris,httpHeaders){state,track->
                     val map = mapOf(
                         "name" to videoPart.name,
-                        "state" to it)
-                    Log.d("event","$it")
+                        "state" to state,
+                        "track" to track)
+                    //Log.d("event","$state")
                     event(map)
                 }
             }
@@ -675,7 +669,7 @@ fun ConstructPart(
 
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun VideoPlayer(uris: List<String>,headers:Map<String,String>,listener:(Int) -> Unit = {_ ->}) {
+fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,String) -> Unit = { _, _ ->}) {
     val context = LocalContext.current
 
     val exoPlayer = remember {
@@ -746,11 +740,12 @@ fun VideoPlayer(uris: List<String>,headers:Map<String,String>,listener:(Int) -> 
             }
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 //listener(playbackState)
+                listener(0,mediaItem?.localConfiguration?.uri.toString())
                 Log.d("MediaItem","${mediaItem?.localConfiguration?.uri}")
             }
             override fun onPlaybackStateChanged(playbackState: Int) {
                 Log.d("playbackState","$playbackState")
-                listener(playbackState)
+                listener(playbackState,"_")
             }
         }
         exoPlayer.addListener(listener)
