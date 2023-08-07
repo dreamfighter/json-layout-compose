@@ -416,7 +416,7 @@ fun ConstructPart(
                     val map = mapOf(
                         "name" to videoPart.name,
                         "state" to state,
-                        "track" to track)
+                        "track" to track.toString())
                     //Log.d("event","$state")
                     event(map)
                 }
@@ -669,7 +669,7 @@ fun ConstructPart(
 
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,String) -> Unit = { _, _ ->}) {
+fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,Uri?) -> Unit = { _, _ ->}) {
     val context = LocalContext.current
 
     val exoPlayer = remember {
@@ -740,12 +740,12 @@ fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,S
             }
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 //listener(playbackState)
-                listener(0,mediaItem?.localConfiguration?.uri.toString())
+                listener(0,mediaItem?.localConfiguration?.uri)
                 Log.d("MediaItem","${mediaItem?.localConfiguration?.uri}")
             }
             override fun onPlaybackStateChanged(playbackState: Int) {
                 Log.d("playbackState","$playbackState")
-                listener(playbackState,"_")
+                listener(playbackState,null)
             }
         }
         exoPlayer.addListener(listener)
