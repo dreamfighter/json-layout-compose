@@ -729,7 +729,7 @@ fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,S
             }
         })
     ) {
-        val listener = object: Player.Listener {
+        val playerListener = object: Player.Listener {
 
             override fun onTracksInfoChanged(tracksInfo: TracksInfo) {
                 Log.d("tracksInfo","${tracksInfo.trackGroupInfos[1].trackGroup}")
@@ -748,9 +748,9 @@ fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,S
                 listener(playbackState,null)
             }
         }
-        exoPlayer.addListener(listener)
+        exoPlayer.addListener(playerListener)
         onDispose {
-            exoPlayer.removeListener(listener)
+            exoPlayer.removeListener(playerListener)
             exoPlayer.release()
         }
     }
