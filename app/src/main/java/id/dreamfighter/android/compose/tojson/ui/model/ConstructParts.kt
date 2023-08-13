@@ -669,7 +669,7 @@ fun ConstructPart(
 
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,Uri?) -> Unit = { _, _ ->}) {
+fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,String?) -> Unit = { _, _ ->}) {
     val context = LocalContext.current
 
     val exoPlayer = remember {
@@ -740,7 +740,7 @@ fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,U
             }
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 //listener(playbackState)
-                listener(0,mediaItem?.localConfiguration?.uri)
+                listener(0,mediaItem?.localConfiguration?.uri?.lastPathSegment)
                 Log.d("MediaItem","${mediaItem?.localConfiguration?.uri}")
             }
             override fun onPlaybackStateChanged(playbackState: Int) {
