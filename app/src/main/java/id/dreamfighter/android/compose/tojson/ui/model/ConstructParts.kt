@@ -11,8 +11,10 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -96,7 +98,9 @@ class SimpleCacheBuilder private constructor() {
 }
 
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class,
+    ExperimentalFoundationApi::class
+)
 @Composable
 fun ConstructPart(
     listItems: ListItems,
@@ -192,6 +196,10 @@ fun ConstructPart(
                                     partModifier.clip(RoundedCornerShape(topEnd = topEnd, topStart = topStart))
                             }
                         }
+                    }
+                    "basicMarquee" ->{
+                        partModifier =
+                            partModifier.basicMarquee(iterations = Int.MAX_VALUE)
                     }
                     "animated" -> {
                         val animated = value as Map<String,String>
@@ -490,7 +498,7 @@ fun ConstructPart(
                 } else {
 
                     val context = LocalContext.current
-                    Log.d("GLIDE_URL",imageUrl)
+                    //Log.d("GLIDE_URL",imageUrl)
                     Image(
                         rememberAsyncImagePainter(
                             ImageRequest.Builder(context)
