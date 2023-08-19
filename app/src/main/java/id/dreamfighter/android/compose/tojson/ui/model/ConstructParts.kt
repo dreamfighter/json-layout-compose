@@ -23,6 +23,8 @@ import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotMutableState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +68,7 @@ import id.dreamfighter.android.compose.tojson.ui.model.type.FontSize
 import id.dreamfighter.android.compose.tojson.ui.model.type.Type
 import id.dreamfighter.android.compose.tojson.ui.model.utils.color
 import id.dreamfighter.android.compose.tojson.ui.model.utils.createModifier
+import id.dreamfighter.android.compose.tojson.ui.model.view.AutoScrollingLazyRow
 import id.dreamfighter.android.compose.tojson.ui.theme.DefaultFont
 import kotlinx.coroutines.delay
 import okhttp3.Headers
@@ -97,7 +100,6 @@ class SimpleCacheBuilder private constructor() {
     }
 }
 
-
 @OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class,
     ExperimentalFoundationApi::class
 )
@@ -113,6 +115,8 @@ fun ConstructPart(
             val textPart = listItems as Text
             var partModifier = modifier
             var fontfamily = DefaultFont
+            //var texts = mutableStateListOf<String>()
+            var texts by remember { mutableStateOf(mutableListOf<String>()) }
             //Log.d("TEXT","${textPart.name}=>${data[textPart.name]}")
 
             var fontWeight = when(textPart.fontWeight){
@@ -140,7 +144,14 @@ fun ConstructPart(
                         else -> FontWeight.Normal
                     }
                 }
-                datas["text"] as String
+                if(datas["texts"]!=null) {
+                    texts = datas["texts"] as MutableList<String>
+                }
+                if(datas["text"]!=null) {
+                    datas["text"] as String
+                }else{
+                    ""
+                }
             }else{
                 textPart.message
             }
@@ -160,6 +171,7 @@ fun ConstructPart(
             }
 
             var color = Color.Black
+            var verticalAnimateScroll = false
 
             if(textPart.color!=null){
                 color = textPart.color.color
@@ -177,10 +189,16 @@ fun ConstructPart(
                         padding["end"]?.let {
                             partModifier = partModifier.padding(end = it.dp)
                         }
+                        padding["top"]?.let {
+                            partModifier = partModifier.padding(top = it.dp)
+                        }
+                        padding["bottom"]?.let {
+                            partModifier = partModifier.padding(bottom = it.dp)
+                        }
                     }
                     "background" -> partModifier =
                         partModifier.background(value.toString().color)
-                    "clip" ->{
+                    "clip" -> {
                         val clip = value as Map<String,String>
                         when("${clip["type"]}"){
                             "ROUND" -> {
@@ -197,7 +215,7 @@ fun ConstructPart(
                             }
                         }
                     }
-                    "basicMarquee" ->{
+                    "basicMarquee" -> {
                         partModifier =
                             partModifier.basicMarquee(iterations = Int.MAX_VALUE)
                     }
@@ -221,23 +239,41 @@ fun ConstructPart(
                                 partModifier =
                                     partModifier.horizontalScroll(scrollState, false)
                             }
+                            "vertical_scroll" -> {
+                                verticalAnimateScroll = true
+                            }
                         }
-
                     }
                 }
             }
 
-            Text(
-                maxLines = textPart.maxLines,
-                text = text,
-                color = color,
-                modifier = partModifier,
-                textAlign = textAlign,
-                fontSize = fontSize,
-                fontWeight = fontWeight,
-                fontFamily = fontfamily
-            )
+            if(verticalAnimateScroll && texts.isNotEmpty()) {
+                Log.d("vertical_scroll","true")
+                AutoScrollingLazyRow(list = texts,modifier = partModifier) {
+                    Text(
+                        maxLines = textPart.maxLines,
+                        text = it,
+                        color = color,
+                        modifier = partModifier,
+                        textAlign = textAlign,
+                        fontSize = fontSize,
+                        fontWeight = fontWeight,
+                        fontFamily = fontfamily
+                    )
+                }
 
+            }else{
+                Text(
+                    maxLines = textPart.maxLines,
+                    text = text,
+                    color = color,
+                    modifier = partModifier,
+                    textAlign = textAlign,
+                    fontSize = fontSize,
+                    fontWeight = fontWeight,
+                    fontFamily = fontfamily
+                )
+            }
         }
 
         Type.ANIMATED_VISIBILITY -> {
@@ -273,6 +309,11 @@ fun ConstructPart(
                             // Overwrites the default animation with tween for this slide animation.
                             -fullWidth
                         }
+                        "SLIDE_UP" -> slideInVertically(animationSpec = tween(durationMillis = 200)) { fullHeight ->
+                            // Offsets the content by 1/3 of its width to the left, and slide towards right
+                            // Overwrites the default animation with tween for this slide animation.
+                            +fullHeight
+                        }
                         "FADE" -> fadeIn(
                             // Overwrites the default animation with tween
                             animationSpec = tween(durationMillis = 200)
@@ -288,6 +329,10 @@ fun ConstructPart(
                         "SLIDE_RIGHT" -> slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh)) { fullWidth->
                             // Overwrites the ending position of the slide-out to 200 (pixels) to the right
                             -fullWidth
+                        }
+                        "SLIDE_UP" -> slideOutVertically(animationSpec = spring(stiffness = Spring.StiffnessHigh)) { fullHeight->
+                            // Overwrites the ending position of the slide-out to 200 (pixels) to the right
+                            +fullHeight
                         }
                         "FADE" -> fadeOut()
                         else -> slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh)) { fullWidth->
@@ -310,6 +355,7 @@ fun ConstructPart(
 
             if(!hidden) {
                 AnimatedVisibility(
+                    modifier = modifier,
                     visible = visible,
                     enter = enterAnimation,
                     exit = exitAnimation
@@ -444,10 +490,9 @@ fun ConstructPart(
                 else -> Alignment.Center
             }
             var partModifier = modifier
-            var image: Painter = painterResource(id = R.drawable.temp_masjid_img)
+            //var image: Painter = painterResource(id = R.drawable.temp_masjid_img)
 
             if(imagePart.props["contentScale"] == "FillWidth"){
-
                 contentScale = ContentScale.FillWidth
             }
             if(imagePart.props["fillMaxWidth"] == true){
@@ -498,7 +543,7 @@ fun ConstructPart(
                 } else {
 
                     val context = LocalContext.current
-                    //Log.d("GLIDE_URL",imageUrl)
+                    Log.d("GLIDE_URL",imageUrl)
                     Image(
                         rememberAsyncImagePainter(
                             ImageRequest.Builder(context)
@@ -525,6 +570,21 @@ fun ConstructPart(
             box.props.forEach { (key, value) ->
                 //Log.d("BOX_PROPS","$key => $value")
                 when(key){
+                    "padding" -> {
+                        val padding = value as Map<String,Double>
+                        padding["start"]?.let {
+                            partModifier = partModifier.padding(start = it.dp)
+                        }
+                        padding["end"]?.let {
+                            partModifier = partModifier.padding(end = it.dp)
+                        }
+                        padding["top"]?.let {
+                            partModifier = partModifier.padding(top = it.dp)
+                        }
+                        padding["bottom"]?.let {
+                            partModifier = partModifier.padding(bottom = it.dp)
+                        }
+                    }
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
                     "fillMaxHeight" -> partModifier = partModifier.fillMaxHeight()
                     "background" -> partModifier = partModifier.background(value.toString().color)
@@ -546,11 +606,29 @@ fun ConstructPart(
             ) {
                 items?.let {
                     for (item in items) {
-                        val modifier = Modifier
-                        item.props.forEach { (key, value) ->
+                        var modifierItem = Modifier.padding(0.dp)
+                        item.props = item.props.filter { (key, value) ->
                             //Log.d("PROPS","$key => $value")
+                            when(key){
+                                "align"-> {
+                                    modifierItem = modifierItem.align(alignment = when(value) {
+                                        "TOP_START" -> Alignment.TopStart
+                                        "TOP_CENTER" -> Alignment.TopCenter
+                                        "TOP_END" -> Alignment.TopEnd
+                                        "CENTER" -> Alignment.Center
+                                        "CENTER_START" -> Alignment.CenterStart
+                                        "CENTER_END" -> Alignment.CenterEnd
+                                        "BOTTOM_START" -> Alignment.BottomStart
+                                        "BOTTOM_CENTER" -> Alignment.BottomCenter
+                                        "BOTTOM_END" -> Alignment.BottomEnd
+                                        else -> Alignment.TopStart
+                                    })
+                                    false
+                                }
+                                else -> true
+                            }
                         }
-                        ConstructPart(item, modifier = modifier,data)
+                        ConstructPart(item, modifier = modifierItem,data,event)
                     }
                 }
             }
@@ -562,6 +640,7 @@ fun ConstructPart(
 
         Type.COLUMN -> {
             val column = listItems as Column
+            var partModifier = modifier
             val items = column.listItems
             val horizontalAlignment = when(column.horizontalAlignment){
                 "START" -> Alignment.Start
@@ -569,24 +648,47 @@ fun ConstructPart(
                 else -> Alignment.CenterHorizontally
             }
 
+            column.props.forEach { (key, value) ->
+                //Log.d("PROPS","$key => $value")
+                when(key){
+                    "height" -> partModifier = partModifier.height((value as Double).dp)
+                    "background" -> partModifier = partModifier.background(value.toString().color)
+                    "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
+                }
+            }
+
             Column(
                 horizontalAlignment = horizontalAlignment,
-                modifier = modifier
+                modifier = partModifier
             ) {
                 for (item in items) {
-                    var partModifier = createModifier(listItems = item)
-                    item.props.forEach { (key, value) ->
+                    var modifierItem = createModifier(listItems = item)
+                    item.props = item.props.filter { (key, value) ->
                         //Log.d("COLUMN_PROPS","$key => $value")
                         when(key){
-                            "align" ->  partModifier = Modifier.align(alignment = when(value) {
-                                "START" -> Alignment.Start
-                                else -> Alignment.Start
-                            })
-                            "weight" -> partModifier = Modifier.weight((value as Double).toFloat())
-                            "fillWeight" -> partModifier = Modifier.weight((value as Double).toFloat(),fill = true)
+                            "align" ->  {
+                                modifierItem = modifierItem.align(alignment = when(value) {
+                                    "START" -> Alignment.Start
+                                    else -> Alignment.Start
+                                })
+                                false
+                            }
+                            "background" -> {
+                                modifierItem = modifierItem.background(value.toString().color)
+                                false
+                            }
+                            "weight" -> {
+                                modifierItem = modifierItem.weight((value as Double).toFloat())
+                                false
+                            }
+                            "fillWeight" -> {
+                                modifierItem = modifierItem.weight((value as Double).toFloat(),fill = true)
+                                false
+                            }
+                            else -> true
                         }
                     }
-                    ConstructPart(item, partModifier,data)
+                    ConstructPart(item, modifier = modifierItem,data,event)
                 }
             }
         }
@@ -609,11 +711,18 @@ fun ConstructPart(
             ) {
                 for (item in items) {
                     var modifierItem = createModifier(item)
-                    item.props.forEach { (key, value) ->
-                        //Log.d("PROPS","$key => $value")
+                    //Log.d("Row_child","${item.type} => ${item.name}")
+                    item.props = item.props.filter { (key, value) ->
+                        //Log.d("Row_child","$key => $value")
                         when(key){
-                            "weight" -> modifierItem = modifierItem.weight((value as Double).toFloat())
-                            "fillWeight" -> modifierItem = modifierItem.weight((value as Double).toFloat(),fill = true)
+                            "weight" -> {
+                                modifierItem = modifierItem.weight((value as Double).toFloat())
+                                false
+                            }
+                            "fillWeight" -> {
+                                modifierItem = modifierItem.weight((value as Double).toFloat(),fill = true)
+                                false
+                            }
                             "padding" -> {
                                 val padding = value as Map<String,Double>
                                 padding["start"]?.let {
@@ -622,11 +731,16 @@ fun ConstructPart(
                                 padding["end"]?.let {
                                     modifierItem = modifierItem.padding(end = it.dp)
                                 }
+                                false
                             }
-                            "background" -> modifierItem.background(value.toString().color)
+                            "background" -> {
+                                modifierItem = modifierItem.background(value.toString().color)
+                                false
+                            }
+                            else -> true
                         }
                     }
-                    ConstructPart(item, modifierItem,data)
+                    ConstructPart(item, modifierItem,data,event)
                 }
             }
         }
@@ -659,11 +773,15 @@ fun ConstructPart(
             ) {
                 for (item in items) {
                     var modifierItem = Modifier.background("#00FFFFFF".color)
-                    item.props.forEach { (key, value) ->
+                    item.props = item.props.filter { (key, value) ->
                         //Log.d("CARD_PROPS","$key => $value")
                         when(key) {
-                            "background" -> modifierItem =
-                                modifierItem.background(value.toString().color)
+                            "background" -> {
+                                modifierItem =
+                                    modifierItem.background(value.toString().color)
+                                false
+                            }
+                            else -> true
                         }
                     }
                     ConstructPart(item, modifierItem,data)
@@ -672,7 +790,6 @@ fun ConstructPart(
         }
     }
 }
-
 
 
 @Composable
@@ -738,10 +855,6 @@ fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,S
         })
     ) {
         val playerListener = object: Player.Listener {
-
-            override fun onTracksInfoChanged(tracksInfo: TracksInfo) {
-                Log.d("tracksInfo","${tracksInfo.trackGroupInfos[1].trackGroup}")
-            }
 
             override fun onPlaylistMetadataChanged(mediaMetadata: MediaMetadata) {
                 Log.d("mediaMetadata","${mediaMetadata.mediaUri}")

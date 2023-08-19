@@ -9,5 +9,6 @@ class Column(
     alignment: Align = Align.CENTER,
     weight: Float = 0f,
     val horizontalAlignment:String?,
-    backgroundColor: ItemColor = ItemColor.NONE
-) : ListItems(Type.COLUMN, alignment, weight, backgroundColor)
+    backgroundColor: ItemColor = ItemColor.NONE,
+    props:Map<String,Any> = mapOf()
+) : ListItems(Type.COLUMN, alignment, weight, backgroundColor,props)

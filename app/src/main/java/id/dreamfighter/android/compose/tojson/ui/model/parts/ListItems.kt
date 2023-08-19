@@ -10,6 +10,6 @@ sealed class ListItems(
     val alignment: Align = Align.NONE,
     val weight: Float = 0f,
     val backgroundColor: ItemColor = ItemColor.NONE,
-    val props:Map<String,Any> = mapOf(),
+    var props:Map<String,Any> = mapOf(),
     val name:String = UUID.randomUUID().toString()
 )
