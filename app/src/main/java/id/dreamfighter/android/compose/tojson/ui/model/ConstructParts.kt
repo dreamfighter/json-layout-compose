@@ -1,5 +1,6 @@
 package id.dreamfighter.android.compose.tojson.ui.model
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -100,6 +101,7 @@ class SimpleCacheBuilder private constructor() {
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class,
     ExperimentalFoundationApi::class
 )
@@ -116,7 +118,7 @@ fun ConstructPart(
             var partModifier = modifier
             var fontfamily = DefaultFont
             //var texts = mutableStateListOf<String>()
-            var texts by remember { mutableStateOf(mutableListOf<String>()) }
+            var texts by remember { mutableStateOf(listOf<String>()) }
             //Log.d("TEXT","${textPart.name}=>${data[textPart.name]}")
 
             var fontWeight = when(textPart.fontWeight){
@@ -144,8 +146,11 @@ fun ConstructPart(
                         else -> FontWeight.Normal
                     }
                 }
-                if(datas["texts"]!=null) {
-                    texts = datas["texts"] as MutableList<String>
+                if(datas["texts"]!=null && datas["texts"] is MutableList<*>) {
+                    texts = (datas["texts"] as MutableList<String>).map {
+                        Log.d("MutableList",it)
+                        it
+                    }
                 }
                 if(datas["text"]!=null) {
                     datas["text"] as String
@@ -247,8 +252,15 @@ fun ConstructPart(
                 }
             }
 
+            if(data[textPart.name]!=null) {
+                val datas = data[textPart.name] as Map<*, *>
+            }
+
             if(verticalAnimateScroll && texts.isNotEmpty()) {
-                Log.d("vertical_scroll","true")
+                texts.forEach {
+                    Log.d("vertical_scroll","$it")
+
+                }
                 AutoScrollingLazyRow(list = texts,modifier = partModifier) {
                     Text(
                         maxLines = textPart.maxLines,

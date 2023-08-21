@@ -33,7 +33,7 @@ private class AutoScrollItem<T>(
 
 @Composable
 fun <T : Any> AutoScrollingLazyRow(
-    list: MutableList<T>,
+    list: List<T>,
     modifier: Modifier = Modifier,
     itemContent: @Composable (item: T) -> Unit,
 ) {
@@ -41,10 +41,14 @@ fun <T : Any> AutoScrollingLazyRow(
     val coroutineScope = rememberCoroutineScope()
 
     var items by remember { mutableStateOf(listOf<AutoScrollItem<T>>()) }
+    Log.d("LaunchedEffect","${list.size}")
+    list.forEach {
+        Log.d("LaunchedEffect","$it")
+    }
+
+    items = list.mapAutoScrollItem()
 
     LaunchedEffect(key1 = Unit) {
-        Log.d("LaunchedEffect","${items.size}")
-        items = list.mapAutoScrollItem()
         coroutineScope.launch {
             lazyListState.scrollToItem(
                 0,
@@ -60,7 +64,7 @@ fun <T : Any> AutoScrollingLazyRow(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         itemsIndexed(
-            items, key = { idx:Int, item:AutoScrollItem<T> -> item.id }
+            items, key = { _:Int, item:AutoScrollItem<T> -> item.id }
         ) { index:Int, item:AutoScrollItem<T> ->
             itemContent(item = item.data)
 
