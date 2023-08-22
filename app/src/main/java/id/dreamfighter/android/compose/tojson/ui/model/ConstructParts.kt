@@ -209,14 +209,22 @@ fun ConstructPart(
                             "ROUND" -> {
                                 var topEnd = 0.dp
                                 var topStart = 0.dp
+                                var bottomStart = 0.dp
+                                var bottomEnd = 0.dp
                                 if(clip["topEnd"]!=null){
                                     topEnd = (clip["topEnd"] as Double).dp
                                 }
                                 if(clip["topStart"]!=null){
                                     topStart = (clip["topStart"] as Double).dp
                                 }
+                                if(clip["bottomStart"]!=null){
+                                    bottomStart = (clip["bottomStart"] as Double).dp
+                                }
+                                if(clip["bottomEnd"]!=null){
+                                    bottomEnd = (clip["bottomEnd"] as Double).dp
+                                }
                                 partModifier =
-                                    partModifier.clip(RoundedCornerShape(topEnd = topEnd, topStart = topStart))
+                                    partModifier.clip(RoundedCornerShape(topEnd = topEnd, topStart = topStart, bottomStart = bottomStart, bottomEnd = bottomEnd))
                             }
                         }
                     }

@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 private const val SCROLL_DX = 24f
-private const val REQUIRED_CARD_COUNT = 8
+private const val REQUIRED_CARD_COUNT = 18
 
 private class AutoScrollItem<T>(
     val id: String = UUID.randomUUID().toString(),
