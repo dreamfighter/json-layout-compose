@@ -24,8 +24,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotMutableState
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +43,6 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.TracksInfo
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
@@ -67,6 +64,8 @@ import id.dreamfighter.android.compose.tojson.ui.model.parts.*
 import id.dreamfighter.android.compose.tojson.ui.model.type.Align
 import id.dreamfighter.android.compose.tojson.ui.model.type.FontSize
 import id.dreamfighter.android.compose.tojson.ui.model.type.Type
+import id.dreamfighter.android.compose.tojson.ui.model.utils.collectBoxProps
+import id.dreamfighter.android.compose.tojson.ui.model.utils.collectRowScopeProps
 import id.dreamfighter.android.compose.tojson.ui.model.utils.color
 import id.dreamfighter.android.compose.tojson.ui.model.utils.createModifier
 import id.dreamfighter.android.compose.tojson.ui.model.view.AutoScrollingLazyRow
@@ -86,7 +85,7 @@ class SimpleCacheBuilder private constructor() {
             instance ?: synchronized(this) {
                 val databaseProvider = StandaloneDatabaseProvider(context)
                 val cacheDir = context.externalCacheDir
-                Log.d("CACHE_DIR","${cacheDir?.exists()} ${cacheDir?.absolutePath}")
+                //Log.d("CACHE_DIR","${cacheDir?.exists()} ${cacheDir?.absolutePath}")
                 //if(cacheDir?.exists() !){
                 //cacheDir?.mkdirs()
                 //}
@@ -148,7 +147,7 @@ fun ConstructPart(
                 }
                 if(datas["texts"]!=null && datas["texts"] is MutableList<*>) {
                     texts = (datas["texts"] as MutableList<String>).map {
-                        Log.d("MutableList",it)
+                        //Log.d("MutableList",it)
                         it
                     }
                 }
@@ -265,10 +264,6 @@ fun ConstructPart(
             }
 
             if(verticalAnimateScroll && texts.isNotEmpty()) {
-                texts.forEach {
-                    Log.d("vertical_scroll","$it")
-
-                }
                 AutoScrollingLazyRow(list = texts,modifier = partModifier) {
                     Text(
                         maxLines = textPart.maxLines,
@@ -584,30 +579,19 @@ fun ConstructPart(
         Type.BOX -> {
             val box = listItems as Box
             val items = box.listItems
-            var partModifier = modifier
+            var partModifier = modifier.collectBoxProps(box.props)
 
-            //Log.d("BOX_PROPS","${box.props}")
-            box.props.forEach { (key, value) ->
-                //Log.d("BOX_PROPS","$key => $value")
-                when(key){
-                    "padding" -> {
-                        val padding = value as Map<String,Double>
-                        padding["start"]?.let {
-                            partModifier = partModifier.padding(start = it.dp)
-                        }
-                        padding["end"]?.let {
-                            partModifier = partModifier.padding(end = it.dp)
-                        }
-                        padding["top"]?.let {
-                            partModifier = partModifier.padding(top = it.dp)
-                        }
-                        padding["bottom"]?.let {
-                            partModifier = partModifier.padding(bottom = it.dp)
-                        }
+            var hidden = false
+            LaunchedEffect(Unit){
+                if(data[box.name]!=null){
+                    //    Log.d("BOX","box.name")
+                    val datas = data[box.name] as Map<*,*>
+                    datas["props"]?.let { props ->
+                        partModifier = modifier.collectBoxProps(props)
                     }
-                    "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
-                    "fillMaxHeight" -> partModifier = partModifier.fillMaxHeight()
-                    "background" -> partModifier = partModifier.background(value.toString().color)
+                    if(datas["hidden"]!=null) {
+                        hidden = datas["hidden"] as Boolean
+                    }
                 }
             }
 
@@ -620,35 +604,48 @@ fun ConstructPart(
             }
 
             //partModifier = content(partModifier,box.props)
+//            if(data[box.name]!=null){
+//                val animateData = data[box.name] as Map<*, *>
+//                if(animateData["hidden"]!=null) {
+//                    hidden = animateData["hidden"] as Boolean
+//                }
+//            }
 
-            Box(
-                modifier = partModifier, contentAlignment = contentAlignment
-            ) {
-                items?.let {
-                    for (item in items) {
-                        var modifierItem = Modifier.padding(0.dp)
-                        item.props = item.props.filter { (key, value) ->
-                            //Log.d("PROPS","$key => $value")
-                            when(key){
-                                "align"-> {
-                                    modifierItem = modifierItem.align(alignment = when(value) {
-                                        "TOP_START" -> Alignment.TopStart
-                                        "TOP_CENTER" -> Alignment.TopCenter
-                                        "TOP_END" -> Alignment.TopEnd
-                                        "CENTER" -> Alignment.Center
-                                        "CENTER_START" -> Alignment.CenterStart
-                                        "CENTER_END" -> Alignment.CenterEnd
-                                        "BOTTOM_START" -> Alignment.BottomStart
-                                        "BOTTOM_CENTER" -> Alignment.BottomCenter
-                                        "BOTTOM_END" -> Alignment.BottomEnd
-                                        else -> Alignment.TopStart
-                                    })
-                                    false
+            //Log.d("IMAGE","${animated.name} hidden $hidden")
+
+            if(!hidden) {
+                Box(
+                    modifier = partModifier, contentAlignment = contentAlignment
+                ) {
+                    items?.let {
+                        for (item in items) {
+                            var modifierItem = Modifier.padding(0.dp)
+                            item.props = item.props.filter { (key, value) ->
+                                //Log.d("PROPS","$key => $value")
+                                when (key) {
+                                    "align" -> {
+                                        modifierItem = modifierItem.align(
+                                            alignment = when (value) {
+                                                "TOP_START" -> Alignment.TopStart
+                                                "TOP_CENTER" -> Alignment.TopCenter
+                                                "TOP_END" -> Alignment.TopEnd
+                                                "CENTER" -> Alignment.Center
+                                                "CENTER_START" -> Alignment.CenterStart
+                                                "CENTER_END" -> Alignment.CenterEnd
+                                                "BOTTOM_START" -> Alignment.BottomStart
+                                                "BOTTOM_CENTER" -> Alignment.BottomCenter
+                                                "BOTTOM_END" -> Alignment.BottomEnd
+                                                else -> Alignment.TopStart
+                                            }
+                                        )
+                                        false
+                                    }
+
+                                    else -> true
                                 }
-                                else -> true
                             }
+                            ConstructPart(item, modifier = modifierItem, data, event)
                         }
-                        ConstructPart(item, modifier = modifierItem,data,event)
                     }
                 }
             }
@@ -712,10 +709,12 @@ fun ConstructPart(
                 }
             }
         }
+
         Type.ROW -> {
             val row = listItems as Row
             val items = row.listItems
             var partModifier = modifier
+
 
             row.props.forEach { (key, value) ->
                 //Log.d("PROPS","$key => $value")
@@ -725,13 +724,32 @@ fun ConstructPart(
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
                 }
             }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = partModifier
             ) {
                 for (item in items) {
+//                    var dt by remember {
+//                        mutableStateOf(mapOf<String,Any>())
+//                    }
+//
+//                    LaunchedEffect(Unit){
+//                        Log.d("props","${data[item.name]}")
+//                        if(data[item.name] !=null) {
+//                            dt = data[item.name] as Map<String, Any>
+//                        }
+//                    }
+//                    var props:Map<String,Any> = mapOf()
+//                    if(dt["props"]!=null) {
+//                        props = dt["props"] as Map<String,Any>
+//                    }
                     var modifierItem = createModifier(item)
-                    //Log.d("Row_child","${item.type} => ${item.name}")
+                    collectRowScopeProps(modifierItem,item.props){ mod,props->
+                        modifierItem = mod
+                        item.props = props
+                    }
+                    /*
                     item.props = item.props.filter { (key, value) ->
                         //Log.d("Row_child","$key => $value")
                         when(key){
@@ -760,6 +778,8 @@ fun ConstructPart(
                             else -> true
                         }
                     }
+
+                     */
                     ConstructPart(item, modifierItem,data,event)
                 }
             }
@@ -786,25 +806,43 @@ fun ConstructPart(
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
                 }
             }
-            Card(
-                modifier = partModifier,
-                elevation = elevation,
-                backgroundColor = color
-            ) {
-                for (item in items) {
-                    var modifierItem = Modifier.background("#00FFFFFF".color)
-                    item.props = item.props.filter { (key, value) ->
-                        //Log.d("CARD_PROPS","$key => $value")
-                        when(key) {
-                            "background" -> {
-                                modifierItem =
-                                    modifierItem.background(value.toString().color)
-                                false
-                            }
-                            else -> true
-                        }
+            var hidden by remember {
+                mutableStateOf(false)
+            }
+
+            LaunchedEffect(Unit){
+                if(data[card.name]!=null){
+                    val dt = data[card.name] as Map<*, *>
+                    Log.d("CARD_PROPS","hidden => ${dt["hidden"]}")
+                    if(dt["hidden"]!=null) {
+                        hidden = dt["hidden"] as Boolean
                     }
-                    ConstructPart(item, modifierItem,data)
+                }
+            }
+
+            if(!hidden) {
+                Log.d("CARD","${card.name} hidden $hidden")
+                Card(
+                    modifier = partModifier,
+                    elevation = elevation,
+                    backgroundColor = color
+                ) {
+                    for (item in items) {
+                        var modifierItem = Modifier.background("#00FFFFFF".color)
+                        item.props = item.props.filter { (key, value) ->
+                            //Log.d("CARD_PROPS","$key => $value")
+                            when (key) {
+                                "background" -> {
+                                    modifierItem =
+                                        modifierItem.background(value.toString().color)
+                                    false
+                                }
+
+                                else -> true
+                            }
+                        }
+                        ConstructPart(item, modifierItem, data)
+                    }
                 }
             }
         }
@@ -832,7 +870,7 @@ fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,S
                     val uri = if(it.startsWith("http")){
                         Uri.parse(it)
                     }else{
-                        Log.d("File","${File(it).exists()}")
+                        //Log.d("File","${File(it).exists()}")
                         Uri.fromFile(File(it))
                     }
                     val source = if(uri.scheme?.startsWith("http")==true){
@@ -877,15 +915,15 @@ fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,S
         val playerListener = object: Player.Listener {
 
             override fun onPlaylistMetadataChanged(mediaMetadata: MediaMetadata) {
-                Log.d("mediaMetadata","${mediaMetadata.mediaUri}")
+                //Log.d("mediaMetadata","${mediaMetadata.mediaUri}")
             }
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 //listener(playbackState)
                 listener(0,mediaItem?.localConfiguration?.uri?.lastPathSegment)
-                Log.d("MediaItem","${mediaItem?.localConfiguration?.uri}")
+                //Log.d("MediaItem","${mediaItem?.localConfiguration?.uri}")
             }
             override fun onPlaybackStateChanged(playbackState: Int) {
-                Log.d("playbackState","$playbackState")
+                //Log.d("playbackState","$playbackState")
                 listener(playbackState,null)
             }
         }
