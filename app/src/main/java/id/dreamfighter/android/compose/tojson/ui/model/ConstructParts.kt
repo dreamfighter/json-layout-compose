@@ -814,7 +814,7 @@ fun ConstructPart(
             LaunchedEffect(Unit){
                 if(data[card.name]!=null){
                     val dt = data[card.name] as Map<*, *>
-                    Log.d("CARD_PROPS","hidden => ${dt["hidden"]}")
+                    //Log.d("CARD_PROPS","hidden => ${dt["hidden"]}")
                     if(dt["hidden"]!=null) {
                         hidden = dt["hidden"] as Boolean
                     }
@@ -822,7 +822,7 @@ fun ConstructPart(
             }
 
             if(!hidden) {
-                Log.d("CARD","${card.name} hidden $hidden")
+                //Log.d("CARD","${card.name} hidden $hidden")
                 Card(
                     modifier = partModifier,
                     elevation = elevation,
