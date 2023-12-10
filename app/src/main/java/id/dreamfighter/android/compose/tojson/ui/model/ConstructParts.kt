@@ -443,6 +443,7 @@ fun ConstructPart(
         Type.VIDEO -> {
             val videoPart = listItems as Video
 
+
             var contentScale = ContentScale.Fit
             val imageAlign = when (videoPart.imageAlign) {
                 Align.START -> Alignment.TopStart
@@ -451,7 +452,7 @@ fun ConstructPart(
             }
             var httpHeaders = mapOf<String,String>()
             var partModifier = modifier
-            val image: Painter = painterResource(id = R.drawable.temp_masjid_img)
+            //val image: Painter = painterResource(id = R.drawable.temp_masjid_img)
 
             if(videoPart.props["contentScale"] == "FillWidth"){
 
@@ -472,7 +473,7 @@ fun ConstructPart(
                 listOf<String>()
             }
 
-            var hidden = false
+            var hidden by remember {mutableStateOf(false)}
             if(data[videoPart.name]!=null){
                 val animateData = data[videoPart.name] as Map<*, *>
                 if(animateData["hidden"]!=null) {
@@ -514,7 +515,7 @@ fun ConstructPart(
                 partModifier = partModifier.fillMaxWidth()
             }
 
-            var hidden = false
+            var hidden by remember {mutableStateOf(false)}
             if(data[imagePart.name]!=null ){
                 val animateData = data[imagePart.name] as SnapshotStateMap<*, *>
                 imageUrl = animateData["url"].toString()
