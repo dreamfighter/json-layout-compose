@@ -811,7 +811,7 @@ fun ConstructPart(
                 mutableStateOf(false)
             }
 
-            LaunchedEffect(Unit){
+            //LaunchedEffect(Unit){
                 if(data[card.name]!=null){
                     val dt = data[card.name] as Map<*, *>
                     //Log.d("CARD_PROPS","hidden => ${dt["hidden"]}")
@@ -819,7 +819,7 @@ fun ConstructPart(
                         hidden = dt["hidden"] as Boolean
                     }
                 }
-            }
+            //}
 
             if(!hidden) {
                 //Log.d("CARD","${card.name} hidden $hidden")
