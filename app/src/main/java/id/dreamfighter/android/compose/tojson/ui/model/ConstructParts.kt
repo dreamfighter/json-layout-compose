@@ -118,6 +118,9 @@ fun ConstructPart(
             var fontfamily = DefaultFont
             //var texts = mutableStateListOf<String>()
             var texts by remember { mutableStateOf(listOf<String>()) }
+            var hidden by remember {mutableStateOf(false)}
+            var setHidden by remember {mutableStateOf(false)}
+
             //Log.d("TEXT","${textPart.name}=>${data[textPart.name]}")
 
             var fontWeight = when(textPart.fontWeight){
@@ -144,6 +147,10 @@ fun ConstructPart(
                         "LIGHT" -> FontWeight.Light
                         else -> FontWeight.Normal
                     }
+                }
+                if(datas["hidden"]!=null) {
+                    hidden = datas["hidden"] as Boolean
+                    setHidden = true
                 }
                 if(datas["texts"]!=null && datas["texts"] is MutableList<*>) {
                     texts = (datas["texts"] as MutableList<String>).map {
@@ -200,6 +207,9 @@ fun ConstructPart(
                             partModifier = partModifier.padding(bottom = it.dp)
                         }
                     }
+                    "hidden" -> if(!setHidden){
+                            hidden = value as Boolean
+                        }
                     "background" -> partModifier =
                         partModifier.background(value.toString().color)
                     "clip" -> {
@@ -259,15 +269,25 @@ fun ConstructPart(
                 }
             }
 
-            if(data[textPart.name]!=null) {
-                val datas = data[textPart.name] as Map<*, *>
-            }
+            if(!hidden) {
+                if (verticalAnimateScroll && texts.isNotEmpty()) {
+                    AutoScrollingLazyRow(list = texts, modifier = partModifier) {
+                        Text(
+                            maxLines = textPart.maxLines,
+                            text = it,
+                            color = color,
+                            modifier = partModifier,
+                            textAlign = textAlign,
+                            fontSize = fontSize,
+                            fontWeight = fontWeight,
+                            fontFamily = fontfamily
+                        )
+                    }
 
-            if(verticalAnimateScroll && texts.isNotEmpty()) {
-                AutoScrollingLazyRow(list = texts,modifier = partModifier) {
+                } else {
                     Text(
                         maxLines = textPart.maxLines,
-                        text = it,
+                        text = text,
                         color = color,
                         modifier = partModifier,
                         textAlign = textAlign,
@@ -276,18 +296,6 @@ fun ConstructPart(
                         fontFamily = fontfamily
                     )
                 }
-
-            }else{
-                Text(
-                    maxLines = textPart.maxLines,
-                    text = text,
-                    color = color,
-                    modifier = partModifier,
-                    textAlign = textAlign,
-                    fontSize = fontSize,
-                    fontWeight = fontWeight,
-                    fontFamily = fontfamily
-                )
             }
         }
 
@@ -522,7 +530,7 @@ fun ConstructPart(
                 if (animateData["headers"] != null) {
                     val headers = animateData["headers"] as Map<String, String>
                     //token = headers["Authorization"] as String
-                    headers.forEach { (key, value) ->
+                    headers?.forEach { (key, value) ->
                         headersHttp.add(key,value)
                     }
                 }
@@ -596,12 +604,16 @@ fun ConstructPart(
                 }
             }
 
-            val contentAlignment: Alignment = when(box.contentAlignment){
-                "CENTER" -> Alignment.Center
-                "TOP_START" -> Alignment.TopStart
-                "BOTTOM_START" -> Alignment.BottomStart
-                "BOTTOM_END" -> Alignment.BottomEnd
-                else -> Alignment.TopStart
+            val contentAlignment: Alignment = if(box.contentAlignment!=null) {
+                when (box.contentAlignment) {
+                    "CENTER" -> Alignment.Center
+                    "TOP_START" -> Alignment.TopStart
+                    "BOTTOM_START" -> Alignment.BottomStart
+                    "BOTTOM_END" -> Alignment.BottomEnd
+                    else -> Alignment.TopStart
+                }
+            }else{
+                Alignment.TopStart
             }
 
             //partModifier = content(partModifier,box.props)

@@ -119,7 +119,9 @@ fun ColumnScope.createModifier(
     } else Modifier
 
     modifier = commonModifier(modifier, listItems)
-
+    if(listItems.alignment == null){
+        return modifier
+    }
     return when (listItems.alignment) {
         Align.START -> modifier.align(Alignment.Start)
         Align.END -> modifier.align(Alignment.End)
@@ -134,6 +136,10 @@ private fun commonModifier(
     modifier: Modifier,
     listItems: ListItems
 ): Modifier {
+
+    if(listItems.backgroundColor == null){
+        return modifier
+    }
     return when (listItems.backgroundColor) {
         ItemColor.RED -> modifier.background(Color.Red)
         ItemColor.GREEN -> modifier.background(Color.Green)
