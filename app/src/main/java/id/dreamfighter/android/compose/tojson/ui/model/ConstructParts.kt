@@ -42,6 +42,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -938,6 +939,10 @@ fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,S
             override fun onPlaybackStateChanged(playbackState: Int) {
                 //Log.d("playbackState","$playbackState")
                 listener(playbackState,null)
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                listener(99,error.errorCodeName)
             }
         }
         exoPlayer.addListener(playerListener)
