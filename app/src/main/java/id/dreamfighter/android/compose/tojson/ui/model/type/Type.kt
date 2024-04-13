@@ -11,5 +11,6 @@ enum class Type {
     BOX,
     SPACER,
     CARD,
-    ANIMATED_VISIBILITY
+    ANIMATED_VISIBILITY,
+    SHAPE
 }

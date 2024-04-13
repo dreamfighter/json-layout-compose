@@ -28,7 +28,13 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -62,6 +68,7 @@ import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.example.dynamicitemlazycolumn.R
 import id.dreamfighter.android.compose.tojson.ui.model.parts.*
+import id.dreamfighter.android.compose.tojson.ui.model.shape.Parallelogram
 import id.dreamfighter.android.compose.tojson.ui.model.type.Align
 import id.dreamfighter.android.compose.tojson.ui.model.type.FontSize
 import id.dreamfighter.android.compose.tojson.ui.model.type.Type
@@ -669,6 +676,46 @@ fun ConstructPart(
 
         }
 
+        Type.SHAPE -> {
+            val shape = listItems as ShapePart
+            var partModifier = modifier
+            val items = shape.listItems
+
+            val width = shape.props["width"] as Double
+            val height = shape.props["height"] as Double
+            val background = shape.props["background"].toString().color
+
+            partModifier = partModifier
+                //.size(Size(width = width ,height = height))
+                .height(height.dp)
+                .clip(
+                    when (shape.shapeType) {
+                        "ROUND" -> {
+                            val cornerSize = if (shape.props["background"] != null) {
+                                (shape.props["background"] as Double).dp
+                            } else {
+                                10.dp
+                            }
+                            RoundedCornerShape(cornerSize)
+                        }
+
+                        "PARALLELOGRAM" -> {
+                            val cornerSize = if (shape.props["angle"] != null) {
+                                (shape.props["angle"] as Double).toFloat()
+                            } else {
+                                10.toFloat()
+                            }
+                            Parallelogram(cornerSize)
+                        }
+
+                        else -> RoundedCornerShape(10.dp)
+                    }
+                )
+                .background(background).fillMaxWidth()
+            ShapeBox(partModifier)
+
+        }
+
         Type.COLUMN -> {
             val column = listItems as Column
             var partModifier = modifier
@@ -863,7 +910,12 @@ fun ConstructPart(
     }
 }
 
-
+@Composable
+fun ShapeBox(modifier: Modifier){
+    Box(
+        modifier = modifier
+    )
+}
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,String?) -> Unit = { _, _ ->}) {
