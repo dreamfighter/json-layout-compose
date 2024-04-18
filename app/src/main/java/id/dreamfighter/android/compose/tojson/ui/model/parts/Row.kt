@@ -9,5 +9,6 @@ class Row(
     alignment: Align = Align.CENTER,
     weight: Float = 0f,
     backgroundColor: ItemColor = ItemColor.NONE,
+    val verticalAlignment:String?,
     props:Map<String,Any> = mapOf()
 ) : ListItems(Type.ROW, alignment, weight, backgroundColor,props)

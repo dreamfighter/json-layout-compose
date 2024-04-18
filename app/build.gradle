@@ -96,7 +96,7 @@ publishing {
         release(MavenPublication) {
             groupId = 'com.github.dreamfighter'
             artifactId = 'json-layout-compose'
-            version = '1.0.67'
+            version = '1.1.4'
             artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')

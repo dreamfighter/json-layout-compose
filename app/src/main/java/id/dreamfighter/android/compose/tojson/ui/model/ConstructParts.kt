@@ -28,13 +28,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -76,6 +70,7 @@ import id.dreamfighter.android.compose.tojson.ui.model.utils.collectBoxProps
 import id.dreamfighter.android.compose.tojson.ui.model.utils.collectRowScopeProps
 import id.dreamfighter.android.compose.tojson.ui.model.utils.color
 import id.dreamfighter.android.compose.tojson.ui.model.utils.createModifier
+import id.dreamfighter.android.compose.tojson.ui.model.utils.gradientBackground
 import id.dreamfighter.android.compose.tojson.ui.model.view.AutoScrollingLazyRow
 import id.dreamfighter.android.compose.tojson.ui.theme.DefaultFont
 import kotlinx.coroutines.delay
@@ -200,6 +195,7 @@ fun ConstructPart(
                 //Log.d("PROPS","$key => $value")
                 when(key){
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
+                    "fillMaxHeight" -> partModifier = partModifier.fillMaxHeight()
                     "padding" -> {
                         val padding = value as Map<String,Double>
                         padding["start"]?.let {
@@ -681,18 +677,28 @@ fun ConstructPart(
             var partModifier = modifier
             val items = shape.listItems
 
-            val width = shape.props["width"] as Double
-            val height = shape.props["height"] as Double
-            val background = shape.props["background"].toString().color
-
+            //val width = shape.props["width"] as Double
+            //val height = shape.props["height"] as Double
+            //val background = if(shape.props["background"]!=null){
+            //    shape.props["background"].toString().color
+            //}else{
+            //    "#bbbbbb00".color
+            //}
+            var hidden by remember {mutableStateOf(false)}
+            if(data[shape.name]!=null ){
+                val shapeData = data[shape.name] as SnapshotStateMap<*, *>
+                if(shapeData["hidden"]!=null) {
+                    hidden = shapeData["hidden"] as Boolean
+                }
+            }
             partModifier = partModifier
                 //.size(Size(width = width ,height = height))
-                .height(height.dp)
+                //.height(height.dp)
                 .clip(
                     when (shape.shapeType) {
                         "ROUND" -> {
-                            val cornerSize = if (shape.props["background"] != null) {
-                                (shape.props["background"] as Double).dp
+                            val cornerSize = if (shape.props["cornerSize"] != null) {
+                                (shape.props["cornerSize"] as Double).dp
                             } else {
                                 10.dp
                             }
@@ -711,9 +717,47 @@ fun ConstructPart(
                         else -> RoundedCornerShape(10.dp)
                     }
                 )
-                .background(background).fillMaxWidth()
-            ShapeBox(partModifier)
+                //.background(background)
+                //.fillMaxWidth()
+            shape.props.let { props ->
+                partModifier = partModifier.collectBoxProps(props)
+            }
+            if(!hidden) {
+                Box(
+                    modifier = partModifier
+                ) {
+                    items.let {
+                        for (item in items) {
+                            var modifierItem = Modifier.padding(0.dp)
+                            item.props = item.props.filter { (key, value) ->
+                                //Log.d("PROPS","$key => $value")
+                                when (key) {
+                                    "align" -> {
+                                        modifierItem = modifierItem.align(
+                                            alignment = when (value) {
+                                                "TOP_START" -> Alignment.TopStart
+                                                "TOP_CENTER" -> Alignment.TopCenter
+                                                "TOP_END" -> Alignment.TopEnd
+                                                "CENTER" -> Alignment.Center
+                                                "CENTER_START" -> Alignment.CenterStart
+                                                "CENTER_END" -> Alignment.CenterEnd
+                                                "BOTTOM_START" -> Alignment.BottomStart
+                                                "BOTTOM_CENTER" -> Alignment.BottomCenter
+                                                "BOTTOM_END" -> Alignment.BottomEnd
+                                                else -> Alignment.TopStart
+                                            }
+                                        )
+                                        false
+                                    }
 
+                                    else -> true
+                                }
+                            }
+                            ConstructPart(item, modifier = modifierItem, data, event)
+                        }
+                    }
+                }
+            }
         }
 
         Type.COLUMN -> {
@@ -732,6 +776,14 @@ fun ConstructPart(
                     "height" -> partModifier = partModifier.height((value as Double).dp)
                     "background" -> partModifier = partModifier.background(value.toString().color)
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
+                    "gradientBackground" -> {
+                        val background = value as Map<*,*>
+                        val angle = background["angle"] as Double
+                        val listColors = (background["colors"] as List<*>).map {
+                            it.toString().color
+                        }
+                        partModifier = partModifier.gradientBackground(listColors, angle = angle.toFloat())
+                    }
                 }
             }
 
@@ -782,12 +834,43 @@ fun ConstructPart(
                 when(key){
                     "height" -> partModifier = partModifier.height((value as Double).dp)
                     "background" -> partModifier = partModifier.background(value.toString().color)
+                    "gradientBackground" -> {
+                        val background = value as Map<*,*>
+                        val angle = background["angle"] as Double
+                        val listColors = (background["colors"] as List<*>).map {
+                            it.toString().color
+                        }
+                        partModifier = partModifier.gradientBackground(listColors, angle = angle.toFloat())
+                    }
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
+                    "intrinsicSizeMax" -> partModifier = partModifier.height(IntrinsicSize.Max)
+
+                    "padding" -> {
+                        val padding = value as Map<String,Double>
+                        padding["start"]?.let {
+                            partModifier = partModifier.padding(start = it.dp)
+                        }
+                        padding["end"]?.let {
+                            partModifier = partModifier.padding(end = it.dp)
+                        }
+                        padding["top"]?.let {
+                            partModifier = partModifier.padding(top = it.dp)
+                        }
+                        padding["bottom"]?.let {
+                            partModifier = partModifier.padding(bottom = it.dp)
+                        }
+                    }
                 }
             }
 
+            val verticalAlignment = when(row.verticalAlignment){
+                "TOP" -> Alignment.Top
+                "BOTTOM" -> Alignment.Bottom
+                else -> Alignment.CenterVertically
+            }
+
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = verticalAlignment,
                 modifier = partModifier
             ) {
                 for (item in items) {
@@ -910,12 +993,6 @@ fun ConstructPart(
     }
 }
 
-@Composable
-fun ShapeBox(modifier: Modifier){
-    Box(
-        modifier = modifier
-    )
-}
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,String?) -> Unit = { _, _ ->}) {

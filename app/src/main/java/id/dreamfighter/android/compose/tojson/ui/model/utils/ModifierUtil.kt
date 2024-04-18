@@ -10,11 +10,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import id.dreamfighter.android.compose.tojson.ui.model.type.Align
 import id.dreamfighter.android.compose.tojson.ui.model.type.ItemColor
 import id.dreamfighter.android.compose.tojson.ui.model.parts.ListItems
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.min
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 @Composable
 fun RowScope.createModifier(
@@ -63,6 +72,12 @@ fun RowScope.collectRowScopeProps(
                 padding["end"]?.let {
                     modifierItem = modifierItem.padding(end = it.dp)
                 }
+                padding["top"]?.let {
+                    modifierItem = modifierItem.padding(top = it.dp)
+                }
+                padding["bottom"]?.let {
+                    modifierItem = modifierItem.padding(bottom = it.dp)
+                }
                 false
             }
             "background" -> {
@@ -78,7 +93,7 @@ fun RowScope.collectRowScopeProps(
 fun Modifier.collectBoxProps(
     props: Any
 ): Modifier {
-    var partModifier = this
+    val partModifier = this
     return partModifier.collectBoxProps(props as Map<String, Any>)
 }
 fun Modifier.collectBoxProps(
@@ -102,9 +117,18 @@ fun Modifier.collectBoxProps(
                     partModifier = partModifier.padding(bottom = it.dp)
                 }
             }
+            "height" -> partModifier = partModifier.height((map.value as Double).dp)
             "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
             "fillMaxHeight" -> partModifier = partModifier.fillMaxHeight()
             "background" -> partModifier = partModifier.background(map.value.toString().color)
+            "gradientBackground" -> {
+                val background = map.value as Map<*,*>
+                val angle = background["angle"] as Double
+                val listColors = (background["colors"] as List<*>).map {
+                    it.toString().color
+                }
+                partModifier = partModifier.gradientBackground(listColors, angle = angle.toFloat())
+            }
         }
     }
     return partModifier
@@ -150,3 +174,28 @@ private fun commonModifier(
 
 val String.color
     get() = Color(android.graphics.Color.parseColor(this))
+
+fun Modifier.gradientBackground(colors: List<Color>, angle: Float) = this.then(
+    Modifier.drawBehind {
+        val angleRad = angle / 180f * PI
+        val x = cos(angleRad).toFloat() //Fractional x
+        val y = sin(angleRad).toFloat() //Fractional y
+
+        val radius = sqrt(size.width.pow(2) + size.height.pow(2)) / 2f
+        val offset = center + Offset(x * radius, y * radius)
+
+        val exactOffset = Offset(
+            x = min(offset.x.coerceAtLeast(0f), size.width),
+            y = size.height - min(offset.y.coerceAtLeast(0f), size.height)
+        )
+
+        drawRect(
+            brush = Brush.linearGradient(
+                colors = colors,
+                start = Offset(size.width, size.height) - exactOffset,
+                end = exactOffset
+            ),
+            size = size
+        )
+    }
+)
