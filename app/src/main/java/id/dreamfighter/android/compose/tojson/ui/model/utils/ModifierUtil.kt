@@ -1,6 +1,10 @@
 package id.dreamfighter.android.compose.tojson.ui.model.utils
 
 import android.util.Log
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -14,6 +18,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import id.dreamfighter.android.compose.tojson.ui.model.type.Align
 import id.dreamfighter.android.compose.tojson.ui.model.type.ItemColor
@@ -117,6 +122,7 @@ fun Modifier.collectBoxProps(
                     partModifier = partModifier.padding(bottom = it.dp)
                 }
             }
+            "animateContentSize" -> partModifier = partModifier.animateContentSize()
             "height" -> partModifier = partModifier.height((map.value as Double).dp)
             "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
             "fillMaxHeight" -> partModifier = partModifier.fillMaxHeight()

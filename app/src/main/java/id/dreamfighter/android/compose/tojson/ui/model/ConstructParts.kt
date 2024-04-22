@@ -2,6 +2,7 @@ package id.dreamfighter.android.compose.tojson.ui.model
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.PointF
 import android.net.Uri
 import android.util.Log
 import android.view.ViewGroup
@@ -62,6 +63,7 @@ import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.example.dynamicitemlazycolumn.R
 import id.dreamfighter.android.compose.tojson.ui.model.parts.*
+import id.dreamfighter.android.compose.tojson.ui.model.shape.CustomShape
 import id.dreamfighter.android.compose.tojson.ui.model.shape.Parallelogram
 import id.dreamfighter.android.compose.tojson.ui.model.type.Align
 import id.dreamfighter.android.compose.tojson.ui.model.type.FontSize
@@ -217,7 +219,7 @@ fun ConstructPart(
                     "background" -> partModifier =
                         partModifier.background(value.toString().color)
                     "clip" -> {
-                        val clip = value as Map<String,String>
+                        val clip = value as Map<String,*>
                         when("${clip["type"]}"){
                             "ROUND" -> {
                                 var topEnd = 0.dp
@@ -238,6 +240,25 @@ fun ConstructPart(
                                 }
                                 partModifier =
                                     partModifier.clip(RoundedCornerShape(topEnd = topEnd, topStart = topStart, bottomStart = bottomStart, bottomEnd = bottomEnd))
+                            }
+                            "PARALLELOGRAM" -> {
+                                val cornerSize = if (clip["offset"] != null) {
+                                    (clip["offset"] as Double).toFloat()
+                                } else {
+                                    0.toFloat()
+                                }
+                                val rightOffset = if (clip["rightOffset"] != null) {
+                                    (clip["rightOffset"] as Double).toFloat()
+                                } else {
+                                    0.toFloat()
+                                }
+                                val leftOffset = if (clip["leftOffset"] != null) {
+                                    (clip["leftOffset"] as Double).toFloat()
+                                } else {
+                                    0.toFloat()
+                                }
+                                partModifier =
+                                    partModifier.clip(Parallelogram(cornerSize,leftOffset,rightOffset))
                             }
                         }
                     }
@@ -336,6 +357,11 @@ fun ConstructPart(
                             // Overwrites the default animation with tween for this slide animation.
                             -fullWidth
                         }
+                        "SLIDE_LEFT" -> slideInHorizontally(animationSpec = tween(durationMillis = 200)) { fullWidth ->
+                            // Offsets the content by 1/3 of its width to the left, and slide towards right
+                            // Overwrites the default animation with tween for this slide animation.
+                            +fullWidth
+                        }
                         "SLIDE_UP" -> slideInVertically(animationSpec = tween(durationMillis = 200)) { fullHeight ->
                             // Offsets the content by 1/3 of its width to the left, and slide towards right
                             // Overwrites the default animation with tween for this slide animation.
@@ -356,6 +382,10 @@ fun ConstructPart(
                         "SLIDE_RIGHT" -> slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh)) { fullWidth->
                             // Overwrites the ending position of the slide-out to 200 (pixels) to the right
                             -fullWidth
+                        }
+                        "SLIDE_LEFT" -> slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh)) { fullWidth->
+                            // Overwrites the ending position of the slide-out to 200 (pixels) to the right
+                            +fullWidth
                         }
                         "SLIDE_UP" -> slideOutVertically(animationSpec = spring(stiffness = Spring.StiffnessHigh)) { fullHeight->
                             // Overwrites the ending position of the slide-out to 200 (pixels) to the right
@@ -706,12 +736,41 @@ fun ConstructPart(
                         }
 
                         "PARALLELOGRAM" -> {
-                            val cornerSize = if (shape.props["angle"] != null) {
-                                (shape.props["angle"] as Double).toFloat()
+                            val cornerSize = if (shape.props["offset"] != null) {
+                                (shape.props["offset"] as Double).toFloat()
                             } else {
-                                10.toFloat()
+                                0.toFloat()
                             }
-                            Parallelogram(cornerSize)
+                            val rightOffset = if (shape.props["rightOffset"] != null) {
+                                (shape.props["rightOffset"] as Double).toFloat()
+                            } else {
+                                0.toFloat()
+                            }
+                            val leftOffset = if (shape.props["leftOffset"] != null) {
+                                (shape.props["leftOffset"] as Double).toFloat()
+                            } else {
+                                0.toFloat()
+                            }
+                            Parallelogram(cornerSize,leftOffset,rightOffset)
+                        }
+
+                        "CUSTOM" -> {
+                            val start = if (shape.props["start"] != null) {
+                                val p = shape.props["start"] as Map<*,*>
+                                PointF((p["x"] as Double).toFloat(),(p["y"] as Double).toFloat())
+                            } else {
+                                PointF(0f,0f)
+                            }
+                            var points = mutableListOf<PointF>()
+                            if (shape.props["points"] != null) {
+                                val listPoints = shape.props["points"] as List<*>
+                                listPoints.forEach {
+                                    val p = it as Map<*,*>
+                                    val point = PointF((p["x"] as Double).toFloat(),(p["y"] as Double).toFloat())
+                                    points.add(point)
+                                }
+                            }
+                            CustomShape(start, points)
                         }
 
                         else -> RoundedCornerShape(10.dp)
