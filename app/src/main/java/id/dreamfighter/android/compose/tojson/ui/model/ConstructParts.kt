@@ -9,8 +9,13 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -30,6 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -196,8 +203,16 @@ fun ConstructPart(
             textPart.props.forEach { (key, value) ->
                 //Log.d("PROPS","$key => $value")
                 when(key){
-                    "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
-                    "fillMaxHeight" -> partModifier = partModifier.fillMaxHeight()
+                    "fillMaxWidth" -> partModifier = if(value == true){
+                            partModifier.fillMaxWidth()
+                        }else{
+                            partModifier.fillMaxWidth((value as Double).toFloat())
+                        }
+                    "fillMaxHeight" -> partModifier = if(value == true){
+                        partModifier.fillMaxHeight()
+                    }else{
+                        partModifier.fillMaxHeight((value as Double).toFloat())
+                    }
                     "padding" -> {
                         val padding = value as Map<String,Double>
                         padding["start"]?.let {
@@ -541,7 +556,7 @@ fun ConstructPart(
             var contentScale = ContentScale.Fit
             val imagePart = listItems as GlideImagePart
             var imageUrl by remember {mutableStateOf("")}
-            var headersHttp = Headers.Builder()
+            val headersHttp = Headers.Builder()
             val imageAlign = when (imagePart.imageAlign) {
                 Align.START -> Alignment.TopStart
                 Align.END -> Alignment.BottomEnd
@@ -550,11 +565,59 @@ fun ConstructPart(
             var partModifier = modifier
             //var image: Painter = painterResource(id = R.drawable.temp_masjid_img)
 
-            if(imagePart.props["contentScale"] == "FillWidth"){
-                contentScale = ContentScale.FillWidth
+            contentScale = when(imagePart.props["contentScale"]){
+                "FillWidth" -> ContentScale.FillWidth
+                "FillHeight" -> ContentScale.FillHeight
+                "Fit" -> ContentScale.Fit
+                "Inside" -> ContentScale.Inside
+                else -> ContentScale.None
             }
-            if(imagePart.props["fillMaxWidth"] == true){
-                partModifier = partModifier.fillMaxWidth()
+            if(imagePart.props["fillMaxWidth"] != null){
+                val value = imagePart.props["fillMaxWidth"]
+                partModifier = if(value == true){
+                    partModifier.fillMaxWidth()
+                }else{
+                    partModifier.fillMaxWidth((value as Double).toFloat())
+                }
+            }
+            if(imagePart.props["fillMaxHeight"] != null){
+                val value = imagePart.props["fillMaxHeight"]
+                partModifier = if(value == true){
+                    partModifier.fillMaxHeight()
+                }else{
+                    partModifier.fillMaxHeight((value as Double).toFloat())
+                }
+            }
+            if(imagePart.props["url"] != null){
+                imageUrl = imagePart.props["url"].toString()
+            }
+
+            if(imagePart.props["swing"]!=null){
+                val angleOffset = 10f
+                val infiniteTransition = rememberInfiniteTransition(label = "infiniteTransition swing")
+                val angle by infiniteTransition.animateFloat(
+                    initialValue = -angleOffset,
+                    targetValue = angleOffset,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(
+                            durationMillis = 4000 + (Math.random() * 100).toInt(),
+                            easing = FastOutSlowInEasing
+                        ),
+                        repeatMode = RepeatMode.Reverse,
+                    ), label = "animate float swing"
+                )
+
+                partModifier = partModifier.graphicsLayer(
+                    transformOrigin = TransformOrigin(
+                        pivotFractionX = 0.5f,
+                        pivotFractionY = 0f,
+                    ),
+                    rotationZ = angle,
+                )
+            }
+
+            if(imagePart.props["width"]!=null){
+                partModifier = partModifier.width(width = (imagePart.props["width"] as Double).dp)
             }
 
             var hidden by remember {mutableStateOf(false)}
@@ -564,7 +627,8 @@ fun ConstructPart(
                 if (animateData["headers"] != null) {
                     val headers = animateData["headers"] as Map<String, String>
                     //token = headers["Authorization"] as String
-                    headers?.forEach { (key, value) ->
+
+                    headers.forEach { (key, value) ->
                         headersHttp.add(key,value)
                     }
                 }
@@ -624,7 +688,11 @@ fun ConstructPart(
             val items = box.listItems
             var partModifier = modifier.collectBoxProps(box.props)
 
-            var hidden = false
+            var hidden by remember {mutableStateOf(false)}
+
+            if(box.props["hidden"]!=null){
+                hidden = box.props["hidden"] as Boolean
+            }
             LaunchedEffect(Unit){
                 if(data[box.name]!=null){
                     //    Log.d("BOX","box.name")
@@ -642,6 +710,7 @@ fun ConstructPart(
                 when (box.contentAlignment) {
                     "CENTER" -> Alignment.Center
                     "TOP_START" -> Alignment.TopStart
+                    "TOP_END" -> Alignment.TopEnd
                     "BOTTOM_START" -> Alignment.BottomStart
                     "BOTTOM_END" -> Alignment.BottomEnd
                     else -> Alignment.TopStart
@@ -699,7 +768,7 @@ fun ConstructPart(
         }
 
         Type.SPACER -> {
-
+            Spacer(modifier = Modifier)
         }
 
         Type.SHAPE -> {
@@ -858,6 +927,7 @@ fun ConstructPart(
                             "align" ->  {
                                 modifierItem = modifierItem.align(alignment = when(value) {
                                     "START" -> Alignment.Start
+                                    "END" -> Alignment.End
                                     else -> Alignment.Start
                                 })
                                 false
