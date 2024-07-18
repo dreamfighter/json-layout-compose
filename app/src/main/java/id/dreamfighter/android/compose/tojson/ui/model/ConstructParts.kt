@@ -347,6 +347,7 @@ fun ConstructPart(
                 EnterExitState.PostExit) }
             val animated = listItems as AnimatedVisibility
             val items = animated.listItems
+            var hidden by remember {mutableStateOf(false)}
 
             LaunchedEffect(Unit) {
                 while(true) {
@@ -415,7 +416,7 @@ fun ConstructPart(
                 }
             }
 
-            var hidden = false
+            //var hidden = false
             if(data[animated.name]!=null){
                 val animateData = data[animated.name] as Map<*, *>
                 if(animateData["hidden"]!=null) {
