@@ -13,5 +13,6 @@ class Video(
     backgroundColor: ItemColor = ItemColor.NONE,
     props:Map<String,Any> = mapOf(),
     var url:String? = null,
+    var headers:Map<String,String>? = null,
     name:String = UUID.randomUUID().toString()
 ) : ListItems(Type.VIDEO, alignment, weight, backgroundColor, props, name)

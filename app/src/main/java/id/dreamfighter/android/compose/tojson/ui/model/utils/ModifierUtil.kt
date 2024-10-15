@@ -205,3 +205,8 @@ fun Modifier.gradientBackground(colors: List<Color>, angle: Float) = this.then(
         )
     }
 )
+
+inline fun <reified T> Any?.asOrFail(): T = this as T
+//inline fun <reified T,reified T> Any.toMapOrFail(): T = this as T
+inline fun <reified T: Any,reified R: Any> Any?.toMapOrEmpty(): Map<T,R> = this as? Map<T,R>?: mapOf()
+inline fun <reified T> Any?.toListOrEmpty(): List<T> = this as? List<T> ?: listOf()

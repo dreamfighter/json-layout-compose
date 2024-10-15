@@ -52,6 +52,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
@@ -59,6 +60,7 @@ import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -75,17 +77,21 @@ import id.dreamfighter.android.compose.tojson.ui.model.shape.Parallelogram
 import id.dreamfighter.android.compose.tojson.ui.model.type.Align
 import id.dreamfighter.android.compose.tojson.ui.model.type.FontSize
 import id.dreamfighter.android.compose.tojson.ui.model.type.Type
+import id.dreamfighter.android.compose.tojson.ui.model.utils.asOrFail
 import id.dreamfighter.android.compose.tojson.ui.model.utils.collectBoxProps
 import id.dreamfighter.android.compose.tojson.ui.model.utils.collectRowScopeProps
 import id.dreamfighter.android.compose.tojson.ui.model.utils.color
 import id.dreamfighter.android.compose.tojson.ui.model.utils.createModifier
 import id.dreamfighter.android.compose.tojson.ui.model.utils.gradientBackground
+import id.dreamfighter.android.compose.tojson.ui.model.utils.toListOrEmpty
+import id.dreamfighter.android.compose.tojson.ui.model.utils.toMapOrEmpty
 import id.dreamfighter.android.compose.tojson.ui.model.view.AutoScrollingLazyRow
 import id.dreamfighter.android.compose.tojson.ui.theme.DefaultFont
 import kotlinx.coroutines.delay
 import okhttp3.Headers
 import java.io.File
 
+@UnstableApi
 class SimpleCacheBuilder private constructor() {
     companion object {
 
@@ -120,7 +126,7 @@ class SimpleCacheBuilder private constructor() {
 fun ConstructPart(
     listItems: ListItems,
     modifier: Modifier = Modifier,
-    data: MutableMap<String,Any?> = mutableMapOf<String,Any?>(),
+    data: MutableMap<String,Any?> = mutableMapOf(),
     event:(Map<String,Any>) -> Unit = {_ ->}
 ) {
     when (listItems.type) {
@@ -340,8 +346,8 @@ fun ConstructPart(
         }
 
         Type.ANIMATED_VISIBILITY -> {
-            val animVisibleState = remember { MutableTransitionState(false) }
-                .apply { targetState = true }
+            //val animVisibleState = remember { MutableTransitionState(false) }.apply { targetState = true }
+
             var visible by remember { mutableStateOf(false) }
             var prevState by remember { mutableStateOf(
                 EnterExitState.PostExit) }
@@ -501,17 +507,19 @@ fun ConstructPart(
         Type.VIDEO -> {
             val videoPart = listItems as Video
 
+            val uris = remember { mutableStateListOf<String>() }
+            val httpHeaders =  remember { mutableStateListOf<Map<String, String>>() }
 
+            //val image: Painter = painterResource(id = R.drawable.temp_masjid_img)
+
+            /*
+            var partModifier = modifier
             var contentScale = ContentScale.Fit
             val imageAlign = when (videoPart.imageAlign) {
                 Align.START -> Alignment.TopStart
                 Align.END -> Alignment.BottomEnd
                 else -> Alignment.Center
             }
-            var httpHeaders = mapOf<String,String>()
-            var partModifier = modifier
-            //val image: Painter = painterResource(id = R.drawable.temp_masjid_img)
-
             if(videoPart.props["contentScale"] == "FillWidth"){
 
                 contentScale = ContentScale.FillWidth
@@ -519,17 +527,53 @@ fun ConstructPart(
             if(videoPart.props["fillMaxWidth"] == true){
                 partModifier = partModifier.fillMaxWidth()
             }
-            val uris = if(data[videoPart.name]!=null){
-                val map = data[videoPart.name] as Map<*, *>
-                if(map["headers"]!=null) {
-                    httpHeaders = map["headers"] as Map<String, String>
+
+             */
+
+            var start = 0
+            //LaunchedEffect(videoPart.url) {
+                videoPart.url?.let{
+                    //Log.d("VIDEO_URL", it)
+                    if(uris.isEmpty()){
+                        uris.add(it)
+                    }else{
+                        uris[0] = it
+                    }
+                    start = 1
+                    (videoPart.headers?:mapOf()).run {
+                        if (httpHeaders.isEmpty()) {
+                            httpHeaders.add(this)
+                        } else {
+                            httpHeaders[0] = this
+                        }
+                    }
                 }
-                map["url"] as List<String>
-            }else if(videoPart.url!=null){
-                listOf<String>(videoPart.url!!)
-            }else{
-                listOf<String>()
+            //}
+
+            if(data[videoPart.name]!=null){
+                val map = data[videoPart.name] as Map<*, *>
+
+                var index = start
+                for(url in map["url"].toListOrEmpty<String>()){
+                    val mapHeaders = map["headers"].toMapOrEmpty<String,String>()
+
+                    //Log.d("VIDEO_URL", "$index")
+                    with(mapHeaders){
+                        if(index < uris.size){
+                            httpHeaders[index] = this
+                            uris[index] = url
+                        }else{
+                            uris.add(url)
+                            httpHeaders.add(this)
+                        }
+                    }
+                    index = index.inc()
+                }
+                //uris.addAll(map["url"] as List<String>)
+                //map["url"] as List<String>
             }
+
+            //Log.d("VIDEO_URL", "${uris.size}")
 
             var hidden by remember {mutableStateOf(false)}
             if(data[videoPart.name]!=null){
@@ -1125,7 +1169,7 @@ fun ConstructPart(
 
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,String?) -> Unit = { _, _ ->}) {
+fun VideoPlayer(uris: List<String>, headers:List<Map<String,String>>, listener: (Int,String?) -> Unit = { _, _ ->}) {
     val context = LocalContext.current
 
     val exoPlayer = remember {
@@ -1135,19 +1179,32 @@ fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,S
 
                 val defaultDataSourceFactory = DefaultHttpDataSource.Factory()
                 //val defaultDataSourceFactory = DefaultDataSource.Factory(context)
-                defaultDataSourceFactory.setDefaultRequestProperties(headers)
 
                 // val progressiveMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
 
-                uris.forEach {
+                uris.forEachIndexed { index, it ->
                     val uri = if(it.startsWith("http")){
                         Uri.parse(it)
                     }else{
                         //Log.d("File","${File(it).exists()}")
                         Uri.fromFile(File(it))
                     }
-                    val source = if(uri.scheme?.startsWith("http")==true){
+                    defaultDataSourceFactory.setDefaultRequestProperties(headers[index])
+
+                    if(headers[index]["volume"] != null){
+                        volume = headers[index]["volume"]?.toFloat() ?: 0f
+                    }else {
+                        volume = 0f
+                    }
+                   //Log.d("lastPathSegment","${uri.lastPathSegment}")
+                    val source = if(uri.lastPathSegment?.endsWith("m3u8")==true){
+                        // Create a data source factory.
+                        //val dataSourceFactory = DefaultHttpDataSource.Factory()
+
+                        HlsMediaSource.Factory(defaultDataSourceFactory).createMediaSource(MediaItem.fromUri(uri))
+                    }else if(uri.scheme?.startsWith("http")==true){
                         val cacheDataSourceFactory = CacheDataSource.Factory()
+                        Log.d("VIDEO_URI","$uri")
 
                         cacheDataSourceFactory.setCache(SimpleCacheBuilder.build(context))
                         cacheDataSourceFactory.setUpstreamDataSourceFactory(defaultDataSourceFactory)
@@ -1167,11 +1224,6 @@ fun VideoPlayer(uris: List<String>, headers:Map<String,String>, listener: (Int,S
     exoPlayer.playWhenReady = true
     exoPlayer.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
     exoPlayer.repeatMode = Player.REPEAT_MODE_ALL
-    if(headers["volume"] != null){
-        exoPlayer.volume = headers["volume"]?.toFloat() ?: 0f
-    }else {
-        exoPlayer.volume = 0f
-    }
 
     DisposableEffect(
         AndroidView(factory = {
