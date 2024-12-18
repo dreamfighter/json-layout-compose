@@ -1,28 +1,29 @@
 package id.dreamfighter.android.compose.tojson.ui.model.utils
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import id.dreamfighter.android.compose.tojson.ui.model.type.Align
 import id.dreamfighter.android.compose.tojson.ui.model.type.ItemColor
 import id.dreamfighter.android.compose.tojson.ui.model.parts.ListItems
+import id.dreamfighter.android.compose.tojson.ui.model.shape.Parallelogram
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min
@@ -107,6 +108,12 @@ fun Modifier.collectBoxProps(
     var partModifier = this
     props.forEach { map ->
         when(map.key){
+            "width" -> {
+                partModifier = when(map.value){
+                    "intrinsicSizeMax" -> partModifier.width(IntrinsicSize.Max)
+                    else -> partModifier.width((map.value as Double).dp)
+                }
+            }
             "padding" -> {
                 val padding = map.value as Map<String,Double>
                 padding["start"]?.let {
@@ -134,6 +141,91 @@ fun Modifier.collectBoxProps(
                     it.toString().color
                 }
                 partModifier = partModifier.gradientBackground(listColors, angle = angle.toFloat())
+            }
+            "border" ->{
+                val border = map.value as Map<*,*>
+                var width = border["width"] as Double
+                var drawBorder = true
+
+                var defColor = Color.Black
+
+                border["color"]?.let {
+                    defColor = it.toString().color
+                }
+
+                border["start"]?.let {
+                    drawBorder = false
+                    width = it as Double
+                    partModifier = partModifier.startBorder(width.dp,defColor)
+                }
+                border["end"]?.let {
+                    drawBorder = false
+                    width = it as Double
+                    partModifier = partModifier.endBorder(width.dp,defColor)
+                }
+                border["top"]?.let {
+                    drawBorder = false
+                    width = it as Double
+                    partModifier = partModifier.topBorder(width.dp,defColor)
+                }
+                border["bottom"]?.let {
+                    drawBorder = false
+                    width = it as Double
+                    partModifier = partModifier.bottomBorder(width.dp,defColor)
+                }
+
+                if(drawBorder){
+                    partModifier = partModifier.border(
+                        BorderStroke(
+                            width = width.dp,
+                            color = defColor
+                        )
+                    )
+                }
+            }
+            "clip" -> {
+                val clip = map.value as Map<String,*>
+                when("${clip["type"]}"){
+                    "ROUND" -> {
+                        var topEnd = 0.dp
+                        var topStart = 0.dp
+                        var bottomStart = 0.dp
+                        var bottomEnd = 0.dp
+                        if(clip["topEnd"]!=null){
+                            topEnd = (clip["topEnd"] as Double).dp
+                        }
+                        if(clip["topStart"]!=null){
+                            topStart = (clip["topStart"] as Double).dp
+                        }
+                        if(clip["bottomStart"]!=null){
+                            bottomStart = (clip["bottomStart"] as Double).dp
+                        }
+                        if(clip["bottomEnd"]!=null){
+                            bottomEnd = (clip["bottomEnd"] as Double).dp
+                        }
+                        partModifier =
+                            partModifier.clip(RoundedCornerShape(topEnd = topEnd, topStart = topStart, bottomStart = bottomStart, bottomEnd = bottomEnd))
+                    }
+                    "PARALLELOGRAM" -> {
+                        val cornerSize = if (clip["offset"] != null) {
+                            (clip["offset"] as Double).toFloat()
+                        } else {
+                            0.toFloat()
+                        }
+                        val rightOffset = if (clip["rightOffset"] != null) {
+                            (clip["rightOffset"] as Double).toFloat()
+                        } else {
+                            0.toFloat()
+                        }
+                        val leftOffset = if (clip["leftOffset"] != null) {
+                            (clip["leftOffset"] as Double).toFloat()
+                        } else {
+                            0.toFloat()
+                        }
+                        partModifier =
+                            partModifier.clip(Parallelogram(cornerSize,leftOffset,rightOffset))
+                    }
+                }
             }
         }
     }
@@ -203,6 +295,86 @@ fun Modifier.gradientBackground(colors: List<Color>, angle: Float) = this.then(
             ),
             size = size
         )
+    }
+)
+
+@SuppressLint("ModifierFactoryUnreferencedReceiver")
+fun Modifier.bottomBorder(strokeWidth: Dp, color: Color) = composed(
+    factory = {
+        val density = LocalDensity.current
+        val strokeWidthPx = density.run { strokeWidth.toPx() }
+
+        Modifier.drawBehind {
+            val width = size.width
+            val height = size.height - strokeWidthPx/2
+
+            drawLine(
+                color = color,
+                start = Offset(x = 0f, y = height),
+                end = Offset(x = width , y = height),
+                strokeWidth = strokeWidthPx
+            )
+        }
+    }
+)
+
+@SuppressLint("ModifierFactoryUnreferencedReceiver")
+fun Modifier.topBorder(strokeWidth: Dp, color: Color) = composed(
+    factory = {
+        val density = LocalDensity.current
+        val strokeWidthPx = density.run { strokeWidth.toPx() }
+
+        Modifier.drawBehind {
+            val width = size.width
+            val height = size.height - strokeWidthPx/2
+
+            drawLine(
+                color = color,
+                start = Offset(x = 0f, y = 0f),
+                end = Offset(x = width , y = 0f),
+                strokeWidth = strokeWidthPx
+            )
+        }
+    }
+)
+
+@SuppressLint("ModifierFactoryUnreferencedReceiver")
+fun Modifier.startBorder(strokeWidth: Dp, color: Color) = composed(
+    factory = {
+        val density = LocalDensity.current
+        val strokeWidthPx = density.run { strokeWidth.toPx() }
+
+        Modifier.drawBehind {
+            val width = size.width
+            val height = size.height - strokeWidthPx/2
+
+            drawLine(
+                color = color,
+                start = Offset(x = 0f, y = 0f),
+                end = Offset(x = 0f , y = height),
+                strokeWidth = strokeWidthPx
+            )
+        }
+    }
+)
+
+@SuppressLint("ModifierFactoryUnreferencedReceiver")
+fun Modifier.endBorder(strokeWidth: Dp, color: Color) = composed(
+    factory = {
+        val density = LocalDensity.current
+        val strokeWidthPx = density.run { strokeWidth.toPx() }
+
+        Modifier.drawBehind {
+            val width = size.width
+            val height = size.height - strokeWidthPx/2
+
+            drawLine(
+                color = color,
+                start = Offset(x = width, y = 0f),
+                end = Offset(x = width , y = height),
+                strokeWidth = strokeWidthPx
+            )
+        }
     }
 )
 

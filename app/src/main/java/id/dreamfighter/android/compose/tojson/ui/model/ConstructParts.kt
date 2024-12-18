@@ -77,7 +77,6 @@ import id.dreamfighter.android.compose.tojson.ui.model.shape.Parallelogram
 import id.dreamfighter.android.compose.tojson.ui.model.type.Align
 import id.dreamfighter.android.compose.tojson.ui.model.type.FontSize
 import id.dreamfighter.android.compose.tojson.ui.model.type.Type
-import id.dreamfighter.android.compose.tojson.ui.model.utils.asOrFail
 import id.dreamfighter.android.compose.tojson.ui.model.utils.collectBoxProps
 import id.dreamfighter.android.compose.tojson.ui.model.utils.collectRowScopeProps
 import id.dreamfighter.android.compose.tojson.ui.model.utils.color
@@ -813,7 +812,7 @@ fun ConstructPart(
         }
 
         Type.SPACER -> {
-            Spacer(modifier = Modifier)
+            Spacer(modifier = modifier)
         }
 
         Type.SHAPE -> {
@@ -942,6 +941,14 @@ fun ConstructPart(
                 "END" -> Alignment.End
                 else -> Alignment.CenterHorizontally
             }
+            val verticalArrangement = when(column.verticalArrangement){
+                "TOP" -> Arrangement.Top
+                "BOTTOM" -> Arrangement.Bottom
+                "CENTER" -> Arrangement.Center
+                "SPACE_AROUNT" -> Arrangement.SpaceAround
+                "SPACE_EVENTLY" -> Arrangement.SpaceEvenly
+                else -> Arrangement.Top
+            }
 
             column.props.forEach { (key, value) ->
                 //Log.d("PROPS","$key => $value")
@@ -949,6 +956,7 @@ fun ConstructPart(
                     "height" -> partModifier = partModifier.height((value as Double).dp)
                     "background" -> partModifier = partModifier.background(value.toString().color)
                     "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
+                    "fillMaxHeight" -> partModifier = partModifier.fillMaxHeight()
                     "gradientBackground" -> {
                         val background = value as Map<*,*>
                         val angle = background["angle"] as Double
@@ -962,6 +970,7 @@ fun ConstructPart(
 
             Column(
                 horizontalAlignment = horizontalAlignment,
+                verticalArrangement = verticalArrangement,
                 modifier = partModifier
             ) {
                 for (item in items) {
@@ -1190,6 +1199,7 @@ fun VideoPlayer(uris: List<String>, headers:List<Map<String,String>>, listener: 
                         Uri.fromFile(File(it))
                     }
                     defaultDataSourceFactory.setDefaultRequestProperties(headers[index])
+                    defaultDataSourceFactory.setAllowCrossProtocolRedirects(true)
 
                     if(headers[index]["volume"] != null){
                         volume = headers[index]["volume"]?.toFloat() ?: 0f
