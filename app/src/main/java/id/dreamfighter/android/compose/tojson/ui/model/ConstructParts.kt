@@ -2,15 +2,17 @@ package id.dreamfighter.android.compose.tojson.ui.model
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.PointF
 import android.net.Uri
 import android.util.Log
 import android.view.ViewGroup
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -71,6 +73,9 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.example.dynamicitemlazycolumn.R
+import com.kevinnzou.web.AccompanistWebViewClient
+import com.kevinnzou.web.WebView
+import com.kevinnzou.web.rememberWebViewState
 import id.dreamfighter.android.compose.tojson.ui.model.parts.*
 import id.dreamfighter.android.compose.tojson.ui.model.shape.CustomShape
 import id.dreamfighter.android.compose.tojson.ui.model.shape.Parallelogram
@@ -117,7 +122,7 @@ class SimpleCacheBuilder private constructor() {
     }
 }
 
-@SuppressLint("UnrememberedMutableState")
+@SuppressLint("UnrememberedMutableState", "SetJavaScriptEnabled")
 @OptIn(ExperimentalAnimationApi::class, ExperimentalGlideComposeApi::class,
     ExperimentalFoundationApi::class
 )
@@ -463,6 +468,81 @@ fun ConstructPart(
                     }
                 }
             }
+        }
+
+        Type.WEB -> {
+            val mUrl = (listItems as Web).url
+            Log.d("WEB","$mUrl")
+            val state = rememberWebViewState(url = "https://masjidtv.id/public/html/makkah-tv")
+            val webClient = remember {
+                object : AccompanistWebViewClient() {
+                    override fun onPageStarted(
+                        view: WebView,
+                        url: String?,
+                        favicon: Bitmap?
+                    ) {
+                        super.onPageStarted(view, url, favicon)
+                        Log.d("Accompanist WebView", "Page started loading for $url")
+                    }
+                }
+            }
+            var partModifier = modifier
+            listItems.props.forEach { (key, value) ->
+                //Log.d("PROPS","$key => $value")
+                when(key){
+                    "height" -> partModifier = partModifier.height((value as Double).dp)
+                    "background" -> partModifier = partModifier.background(value.toString().color)
+                    "fillMaxWidth" -> partModifier = partModifier.fillMaxWidth()
+                    "fillMaxHeight" -> partModifier = partModifier.fillMaxHeight()
+                    "fillMaxSize" -> partModifier = partModifier.fillMaxSize()
+                    "gradientBackground" -> {
+                        val background = value as Map<*,*>
+                        val angle = background["angle"] as Double
+                        val listColors = (background["colors"] as List<*>).map {
+                            it.toString().color
+                        }
+                        partModifier = partModifier.gradientBackground(listColors, angle = angle.toFloat())
+                    }
+                }
+            }
+            WebView(
+                state = state,
+                modifier = partModifier,
+                onCreated = { it.settings.javaScriptEnabled = true },
+                client = webClient
+            )
+            /*
+            AndroidView(factory = {
+                WebView(it).apply {
+                    getSettings().javaScriptEnabled = true;
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    webViewClient = object : android.webkit.WebViewClient() {
+                        override fun onReceivedError(
+                            view: WebView?,
+                            request: WebResourceRequest?,
+                            error: WebResourceError?
+                        ) {
+                            super.onReceivedError(view, request, error)
+                            val errorCode = error?.errorCode
+                            val description = error?.description?.toString()
+
+                            Log.e(
+                                "WebViewError",
+                                "Error Code: $errorCode, Description: $description"
+                            )
+
+                            view?.loadData("<html><body></body></html>", "text/html", "UTF-8")
+                        }
+                    }
+                }
+            }, update = {
+                it.loadUrl("$mUrl")
+            })
+
+             */
         }
 
         Type.BUTTON -> {
