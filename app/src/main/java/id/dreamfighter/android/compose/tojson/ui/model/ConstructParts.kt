@@ -7,8 +7,8 @@ import android.graphics.PointF
 import android.net.Uri
 import android.util.Log
 import android.view.ViewGroup
+import android.webkit.WebSettings
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
@@ -102,7 +102,6 @@ class SimpleCacheBuilder private constructor() {
         @Volatile
         private var instance: SimpleCache? = null
 
-        @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
         fun build(context:Context) =
             instance ?: synchronized(this) {
                 val databaseProvider = StandaloneDatabaseProvider(context)
@@ -484,6 +483,15 @@ fun ConstructPart(
                         super.onPageStarted(view, url, favicon)
                         Log.d("Accompanist WebView", "Page started loading for $url")
                     }
+
+                    override fun onReceivedError(
+                        view: WebView?,
+                        errorCode: Int,
+                        description: String?,
+                        failingUrl: String?
+                    ) {
+                        view?.loadData("<html><body></body></html>", "text/html", "UTF-8")
+                    }
                 }
             }
             var partModifier = modifier
@@ -508,7 +516,10 @@ fun ConstructPart(
             WebView(
                 state = state,
                 modifier = partModifier,
-                onCreated = { it.settings.javaScriptEnabled = true },
+                onCreated = {
+                    it.settings.javaScriptEnabled = true
+                    it.settings.cacheMode = WebSettings.LOAD_NO_CACHE
+                },
                 client = webClient
             )
             /*
