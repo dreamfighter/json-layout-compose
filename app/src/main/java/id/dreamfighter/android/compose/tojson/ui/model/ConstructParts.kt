@@ -7,6 +7,8 @@ import android.graphics.PointF
 import android.net.Uri
 import android.util.Log
 import android.view.ViewGroup
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.FrameLayout
@@ -72,10 +74,10 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
-import com.example.dynamicitemlazycolumn.R
 import com.kevinnzou.web.AccompanistWebViewClient
 import com.kevinnzou.web.WebView
 import com.kevinnzou.web.rememberWebViewState
+import id.dreamfighter.android.compose.tojson.R
 import id.dreamfighter.android.compose.tojson.ui.model.parts.*
 import id.dreamfighter.android.compose.tojson.ui.model.shape.CustomShape
 import id.dreamfighter.android.compose.tojson.ui.model.shape.Parallelogram
@@ -484,14 +486,14 @@ fun ConstructPart(
                         Log.d("Accompanist WebView", "Page started loading for $url")
                     }
 
-                    override fun onReceivedError(
+                    override fun onReceivedHttpError(
                         view: WebView?,
-                        errorCode: Int,
-                        description: String?,
-                        failingUrl: String?
+                        request: WebResourceRequest?,
+                        errorResponse: WebResourceResponse?
                     ) {
                         view?.loadData("<html><body></body></html>", "text/html", "UTF-8")
                     }
+
                 }
             }
             var partModifier = modifier
@@ -828,9 +830,8 @@ fun ConstructPart(
             if(box.props["hidden"]!=null){
                 hidden = box.props["hidden"] as Boolean
             }
-            LaunchedEffect(Unit){
+            //LaunchedEffect(Unit){
                 if(data[box.name]!=null){
-                    //    Log.d("BOX","box.name")
                     val datas = data[box.name] as Map<*,*>
                     datas["props"]?.let { props ->
                         partModifier = modifier.collectBoxProps(props)
@@ -839,7 +840,7 @@ fun ConstructPart(
                         hidden = datas["hidden"] as Boolean
                     }
                 }
-            }
+            //}
 
             val contentAlignment: Alignment = if(box.contentAlignment!=null) {
                 when (box.contentAlignment) {
